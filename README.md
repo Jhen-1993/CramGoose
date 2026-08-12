@@ -1,7 +1,7 @@
-# 讀書鵝 StudyGoose — GitHub Pages 個人 AI Relay 版
+# 溫書鵝 CramGoose — GitHub Pages 個人 AI Relay 版
 ## 第一次使用
 
-進入 GitHub Pages 的讀書鵝後，展開「個人 AI Relay 設定」：
+進入 GitHub Pages 的溫書鵝後，展開「個人 AI Relay 設定」：
 
 1. 選擇你的 Relay 使用 GPT 或 Claude。
 2. 貼上 Cloudflare 的 Production Worker URL。
