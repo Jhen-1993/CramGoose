@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "studygoose-ai-relay",
+  "main": "worker.js",
+  "compatibility_date": "2026-08-12",
+  "vars": {
+    "AI_PROVIDER": "openai",
+    "AI_MODEL": "gpt-5-mini",
+    "ALLOWED_ORIGIN": "https://jhen-1993.github.io"
+  }
+}
