@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>讀書鵝 StudyGoose</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root{
+    --ink:#3E5063;
+    --ink-soft:#7B8DA0;
+    --paper:#F1F6FB;
+    --card:#FFFFFF;
+    --line:#DCE7F2;
+    --blue:#5B8FC7;
+    --blue-soft:#E2EDF8;
+    --amber:#E8B23C;
+    --amber-soft:#FBF0D4;
+    --burgundy:#E37D8C;
+    --burgundy-soft:#FCE7EA;
+    --pink:#E8A7C4;
+    --pink-soft:#FCEEF5;
+    --pink-dark:#D383AB;
+    --teal:#5B8FC7;
+    --teal-soft:#E2EDF8;
+    --serif: 'Space Grotesk', 'Noto Sans TC', 'IBM Plex Sans', sans-serif;
+    --sans: 'Noto Sans TC', 'IBM Plex Sans', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--sans); line-height:1.6;
+  }
+  h1,h2,h3{font-family:var(--serif); font-weight:700; letter-spacing:0;}
+  .app{max-width:920px; margin:0 auto; padding:28px 20px 80px;}
+  header.top{
+    display:flex; align-items:baseline; justify-content:space-between;
+    border-bottom:3px solid var(--pink); padding-bottom:14px; margin-bottom:18px;
+  }
+  header.top h1{font-size:1.5rem; margin:0;}
+  header.top .eyebrow{font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft);}
+  .countdown-bar{
+    background:var(--card); border:1px solid var(--line); border-radius:4px;
+    padding:14px 18px; margin-bottom:22px;
+  }
+  .countdown-bar .row{display:flex; justify-content:space-between; font-size:.85rem; color:var(--ink-soft); margin-bottom:8px;}
+  .track{position:relative; height:14px; background:var(--teal-soft); border-radius:7px; overflow:hidden;}
+  .track .fill{position:absolute; top:0; left:0; bottom:0; background:var(--teal);}
+  .track .review-seg{position:absolute; top:0; bottom:0; background:var(--amber); opacity:.55;}
+  .track .flag{position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--burgundy);}
+  nav.tabs{display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap;}
+  nav.tabs button{
+    font-family:var(--sans); font-size:.85rem; padding:8px 14px; border:1px solid var(--line);
+    background:var(--card); color:var(--ink-soft); border-radius:20px; cursor:pointer;
+  }
+  nav.tabs button.active{background:var(--pink); color:#fff; border-color:var(--pink);}
+  section.panel{display:none; animation:fade .25s ease;}
+  section.panel.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin-bottom:16px;}
+  label{display:block; font-size:.8rem; color:var(--ink-soft); margin-bottom:4px;}
+  input[type=text], input[type=number], input[type=date], select, textarea{
+    width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:4px;
+    font-family:var(--sans); font-size:.9rem; background:#fff; color:var(--ink);
+  }
+  textarea{min-height:120px; resize:vertical; font-family:var(--sans);}
+  table{width:100%; border-collapse:collapse; font-size:.88rem;}
+  th{text-align:left; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); padding:6px 8px; border-bottom:1px solid var(--line);}
+  td{padding:7px 8px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  .btn{
+    display:inline-block; font-family:var(--sans); font-size:.85rem; padding:8px 16px;
+    background:var(--pink); color:#fff; border:none; border-radius:20px; cursor:pointer;
+  }
+  .btn:hover{background:var(--pink-dark);}
+  .btn.secondary{background:transparent; color:var(--pink-dark); border:1px solid var(--pink);}
+  .btn.secondary:hover{background:var(--pink-soft);}
+  .btn.danger{background:var(--burgundy); color:#fff;}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .subject-card{border:1px solid var(--line); border-radius:5px; padding:12px 14px; margin-bottom:14px; background:#fff;}
+  .subject-row{display:flex; gap:8px; align-items:center; margin-bottom:8px;}
+  .subject-row input{flex:1;}
+  .chapters-box{margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);}
+  .chapters-box summary{cursor:pointer; font-weight:600; font-size:.85rem; padding:2px 0 8px; display:flex; align-items:center; gap:8px; list-style:revert;}
+  .chapters-box summary .pill{font-weight:600;}
+  .chapter-rows{display:grid; grid-template-columns:repeat(4, 1fr); gap:6px 10px; margin-top:4px;}
+  .chapter-row{display:flex; align-items:center; gap:6px; background:var(--paper); border-radius:4px; padding:3px 4px 3px 8px; margin-bottom:0;}
+  .chapter-row:hover{background:var(--pink-soft);}
+  .chapter-row input[type=checkbox]{width:auto; flex-shrink:0;}
+  .chapter-row input[type=text]{flex:1; border:none; background:transparent; padding:3px 2px; font-size:.82rem; min-width:0;}
+  .chapter-row input[type=text]:focus{outline:1px solid var(--pink); border-radius:3px; background:#fff;}
+  .chapter-row button{flex-shrink:0; opacity:.35; padding:2px 6px; font-size:.75rem;}
+  .chapter-row:hover button{opacity:1;}
+  .chapter-done{display:flex; align-items:center; gap:4px; font-size:.78rem; color:var(--ink-soft); white-space:nowrap;}
+  .chapter-done input{width:auto;}
+  .chapter-check-list{display:grid; grid-template-columns:repeat(4, 1fr); gap:4px 10px; margin:2px 0 14px 0;}
+  .chapter-check{font-size:.85rem; display:flex; align-items:center; gap:6px; color:var(--ink-soft); cursor:pointer; padding:2px 0;}
+  .chapter-check input{width:auto;}
+  .chapter-check.suggested{color:var(--ink); font-weight:600;}
+  .pill{display:inline-block; font-size:.72rem; padding:2px 9px; border-radius:20px; font-weight:600;}
+  .pill.ok{background:var(--teal-soft); color:var(--teal);}
+  .pill.warn{background:var(--amber-soft); color:var(--amber);}
+  .pill.bad{background:var(--burgundy-soft); color:var(--burgundy);}
+  .task-row{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--line);}
+  .task-row:last-child{border-bottom:none;}
+  .task-row .name{flex:1; font-weight:600;}
+  .task-row .target{color:var(--ink-soft); font-size:.85rem; width:120px;}
+  .task-row input{width:90px;}
+  .empty{color:var(--ink-soft); font-style:italic; padding:20px 0; text-align:center;}
+  .note-item{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--line); font-size:.87rem;}
+  .note-item small{color:var(--ink-soft);}
+  .loading{color:var(--ink-soft); font-size:.85rem; font-style:italic;}
+  .q-block{border:1px solid var(--line); border-radius:5px; padding:12px 14px; margin-bottom:12px; background:#fff;}
+  .q-block .score{float:right; font-weight:700; color:var(--teal);}
+  .flex-between{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;}
+  .muted{color:var(--ink-soft); font-size:.82rem;}
+  .checkbox-list label{display:flex; align-items:center; gap:6px; font-size:.85rem; color:var(--ink); margin-bottom:4px;}
+  .checkbox-list input{width:auto;}
+  .storage-error{
+    display:none; background:var(--burgundy-soft); color:var(--burgundy); border:1px solid var(--burgundy);
+    border-radius:6px; padding:10px 16px; margin-bottom:16px; font-size:.85rem;
+  }
+  .storage-error button{margin-left:10px;}
+  @media (max-width:640px){
+    .chapter-rows, .chapter-check-list{grid-template-columns:repeat(2, 1fr);}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="storage-error" id="storageErrorBanner">
+    ⚠️ 儲存失敗，可能是網路不穩或暫時性問題。<b>資料仍留在畫面上，請先不要關閉分頁</b>，可以再試一次。
+    <button class="btn secondary" id="retrySaveBtn" style="padding:4px 10px">重試</button>
+  </div>
+
+  <header class="top">
+    <div>
+      <div class="eyebrow">STUDYGOOSE · Study Companion</div>
+      <h1>🦢 讀書鵝</h1>
+    </div>
+    <div id="todayLabel" class="muted"></div>
+  </header>
+
+  <div class="countdown-bar" id="countdownBar" style="display:none">
+    <div class="row"><span id="cdText"></span><span id="cdDays"></span></div>
+    <div class="track"><div class="fill" id="cdFill"></div><div class="review-seg" id="cdReview"></div></div>
+  </div>
+
+  <nav class="tabs">
+    <button data-tab="setup" class="active">設定</button>
+    <button data-tab="daily">每日進度</button>
+    <button data-tab="notes">筆記管理</button>
+    <button data-tab="consolidate">總複習 · 統整筆記</button>
+    <button data-tab="mock">模擬考</button>
+  </nav>
+
+  <!-- SETUP -->
+  <section class="panel active" id="panel-setup">
+    <div class="card">
+      <h3>考試資訊</h3>
+      <div class="grid2">
+        <div><label>考試日期</label><input type="date" id="examDate"></div>
+        <div><label>總複習天數（考前 N 天不排新進度，專心複習）</label><input type="number" id="reviewDays" min="0" value="7"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>科目與進度單位</h3>
+      <p class="muted">每個科目設定「總量」與「單位」（例如：12 章、300 頁、40 小時）。系統會依剩餘天數自動平均分配，若某天沒讀完，隔天會自動加重。</p>
+      <div id="subjectRows"></div>
+      <button class="btn secondary" id="addSubjectBtn" style="margin-top:8px">+ 新增科目</button>
+    </div>
+    <button class="btn" id="saveSetupBtn">儲存設定</button>
+    <span id="setupSaved" class="muted" style="margin-left:10px"></span>
+
+    <div class="card" style="margin-top:20px">
+      <h3>個人 AI Relay 設定（選填）</h3>
+      <p class="muted">「統整最終筆記」「模擬考出題／評分」「掃描筆記／圖片辨識」會使用你自己的 GPT／Claude API 帳號。這個網站只儲存 Relay 網址與保護密碼；真正的 API Key 只放在你自己的 Cloudflare Worker Secret，不會放進 GitHub 或這個網頁。每次使用 AI 都會消耗該 API 帳號的 token／額度；ChatGPT Plus、Claude Pro 訂閱不包含 API 額度。</p>
+      <div class="grid2">
+        <div>
+          <label>AI 類型</label>
+          <select id="relayProviderSelect">
+            <option value="openai">GPT／OpenAI</option>
+            <option value="anthropic">Claude／Anthropic</option>
+          </select>
+        </div>
+        <div>
+          <label>AI Relay 網址</label>
+          <input type="text" id="relayUrlInput" placeholder="https://your-study-relay.workers.dev">
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <label>Relay 存取密碼（建議設定）</label>
+        <input type="password" id="relayTokenInput" placeholder="不是 OpenAI／Claude API Key">
+      </div>
+      <button class="btn secondary" id="saveRelayBtn" style="margin-top:8px">測試並儲存 Relay</button>
+      <button class="btn secondary" id="clearRelayBtn" style="margin-top:8px">移除這台裝置的 Relay</button>
+      <span id="relaySaved" class="muted" style="margin-left:10px"></span>
+      <button class="btn secondary" id="clearLegacyKeyBtn" style="display:none; margin-top:8px">清除舊版瀏覽器 API Key</button>
+      <details class="muted" style="margin-top:12px">
+        <summary style="cursor:pointer; font-weight:600">第一次設定怎麼做？</summary>
+        <ol style="margin:8px 0 0; padding-left:20px">
+          <li>到 OpenAI API 或 Anthropic Console 建立自己的 API Key，並確認 API 帳號有額度。</li>
+          <li>將本專案的 <code>studygoose-ai-relay-worker</code> 資料夾部署到自己的 Cloudflare Worker；把 API Key 設為 Secret。</li>
+          <li>將 Cloudflare 產生的 <code>https://...workers.dev</code> 網址與你設定的 Relay 密碼填回此處，按「測試並儲存」。</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+  <!-- DAILY -->
+  <section class="panel" id="panel-daily">
+    <div class="card" id="dailyCard"></div>
+    <div class="card">
+      <h3>補登 / 回溯進度</h3>
+      <p class="muted">已經讀過但還沒記錄的日子，可以在這裡回填，系統會照樣自動重新分配後續進度。</p>
+      <label>選擇日期</label>
+      <input type="date" id="backfillDate">
+      <div id="backfillRows" style="margin-top:10px"></div>
+      <button class="btn" id="saveBackfillBtn" style="margin-top:10px">儲存這一天的進度</button>
+      <span id="backfillSaved" class="muted" style="margin-left:10px"></span>
+    </div>
+    <div class="card">
+      <h3>歷史紀錄</h3>
+      <div id="historyLog"></div>
+    </div>
+    <div class="card">
+      <h3>未來 7 天預估（假設每天都完成當日建議量）</h3>
+      <div id="forecast"></div>
+    </div>
+  </section>
+
+  <!-- NOTES -->
+  <section class="panel" id="panel-notes">
+    <div class="card">
+      <h3>上傳筆記 PDF</h3>
+      <div class="grid2">
+        <div><label>所屬科目</label><select id="noteSubjectSelect"></select></div>
+        <div><label>所屬章節（選填）</label><select id="noteChapterSelect"><option value="">— 不指定章節 —</option></select></div>
+      </div>
+      <div style="margin-top:10px"><label>選擇檔案（PDF 或圖片皆可，可多選）</label><input type="file" id="pdfInput" accept="application/pdf,image/*" multiple></div>
+      <div id="uploadStatus" class="muted" style="margin-top:8px"></div>
+      <p class="muted" style="margin-top:4px">系統會先嘗試直接擷取文字；若偵測到是掃描檔／照片（沒有文字層），會改用 AI 影像辨識逐頁轉錄文字（含手寫辨識），處理時間會比較長。</p>
+    </div>
+    <div class="card">
+      <h3>已上傳筆記</h3>
+      <div id="notesList"></div>
+    </div>
+  </section>
+
+  <!-- CONSOLIDATE -->
+  <section class="panel" id="panel-consolidate">
+    <div class="card">
+      <div class="flex-between">
+        <div>
+          <label>選擇科目</label>
+          <select id="consolidateSubjectSelect"></select>
+        </div>
+        <button class="btn" id="consolidateBtn">AI 統整最終筆記</button>
+      </div>
+      <div id="consolidateStatus" class="loading"></div>
+      <textarea id="consolidateOutput" placeholder="尚未產生統整筆記。上傳該科目的 PDF 筆記後，點擊「AI 統整最終筆記」。"></textarea>
+      <div style="margin-top:8px">
+        <button class="btn secondary" id="saveConsolidateBtn">儲存編輯</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOCK EXAM -->
+  <section class="panel" id="panel-mock">
+    <div class="card">
+      <h3>產生模擬考</h3>
+      <label>納入科目（依統整筆記或原始筆記出題）</label>
+      <div class="checkbox-list" id="mockSubjectChecks"></div>
+      <div class="grid2" style="margin-top:8px">
+        <div><label>題數</label><input type="number" id="mockCount" value="5" min="1" max="10"></div>
+        <div style="align-self:end"><button class="btn" id="genMockBtn">生成模擬考</button></div>
+      </div>
+      <div id="mockStatus" class="loading"></div>
+    </div>
+    <div class="card" id="mockQuestionsCard" style="display:none">
+      <div id="mockQuestions"></div>
+      <button class="btn" id="gradeMockBtn">AI 評分</button>
+      <div id="gradeStatus" class="loading"></div>
+    </div>
+    <div class="card">
+      <h3>模擬考歷史紀錄</h3>
+      <div id="mockHistory"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+// ---------- Local storage shim ----------
+// This standalone (GitHub / self-hosted) build has no server-side storage,
+// so we back window.storage with the browser's localStorage instead.
+// All data stays only on this device/browser.
+window.storage = {
+  async get(key){
+    const raw = localStorage.getItem('sg:'+key);
+    return raw===null ? null : {key, value: raw, shared:false};
+  },
+  async set(key, value){
+    localStorage.setItem('sg:'+key, value);
+    return {key, value, shared:false};
+  },
+  async delete(key){
+    localStorage.removeItem('sg:'+key);
+    return {key, deleted:true, shared:false};
+  },
+  async list(prefix){
+    const p = 'sg:'+(prefix||'');
+    const keys = Object.keys(localStorage).filter(k=>k.startsWith(p)).map(k=>k.slice(3));
+    return {keys, prefix, shared:false};
+  }
+};
+
+// ---------- Personal AI Relay (BYOK) ----------
+// The browser stores only a Worker URL and optional access password. Provider
+// API keys live only as encrypted Cloudflare Worker Secrets.
+const RELAY_STORAGE_KEY = 'sg:ai-relay-v1';
+const LEGACY_API_KEY_STORAGE_KEY = 'sg:anthropic-api-key';
+
+function normalizeRelayUrl(value){
+  const raw = String(value||'').trim();
+  if(!raw) return '';
+  let url;
+  try{ url = new URL(raw); }catch(e){ throw new Error('AI Relay 網址格式不正確'); }
+  if(url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error('AI Relay 網址必須以 https:// 開頭');
+  return url.href.replace(/\/+$/, '');
+}
+function getRelayConfig(){
+  try{
+    const stored = JSON.parse(localStorage.getItem(RELAY_STORAGE_KEY)||'{}');
+    return {
+      provider: stored.provider === 'anthropic' ? 'anthropic' : 'openai',
+      url: stored.url ? normalizeRelayUrl(stored.url) : '',
+      token: typeof stored.token === 'string' ? stored.token : ''
+    };
+  }catch(e){ return {provider:'openai', url:'', token:''}; }
+}
+function setRelayConfig(config){
+  localStorage.setItem(RELAY_STORAGE_KEY, JSON.stringify({
+    provider: config.provider === 'anthropic' ? 'anthropic' : 'openai',
+    url: normalizeRelayUrl(config.url),
+    token: String(config.token||'')
+  }));
+}
+function clearRelayConfig(){ localStorage.removeItem(RELAY_STORAGE_KEY); }
+function providerLabel(provider){ return provider === 'anthropic' ? 'Claude／Anthropic' : 'GPT／OpenAI'; }
+function relayHeaders(config){
+  const headers = {'Content-Type':'application/json'};
+  if(config.token) headers.Authorization = 'Bearer ' + config.token;
+  return headers;
+}
+async function relayRequest(path, payload, suppliedConfig){
+  const config = suppliedConfig || getRelayConfig();
+  if(!config.url) throw new Error('尚未設定個人 AI Relay，請到「設定」頁連接。');
+  const response = await fetch(config.url + path, {
+    method: payload ? 'POST' : 'GET',
+    headers: payload ? relayHeaders(config) : (config.token ? {Authorization:'Bearer ' + config.token} : {}),
+    body: payload ? JSON.stringify(payload) : undefined
+  });
+  let data = {};
+  try{ data = await response.json(); }catch(e){}
+  if(!response.ok) throw new Error((data && data.error) || ('Relay 連線失敗（HTTP ' + response.status + '）'));
+  return data;
+}
+async function testRelayConfig(config){
+  const data = await relayRequest('/health', null, config);
+  if(!data || !data.ok) throw new Error('這不是可用的 StudyGoose AI Relay。');
+  return data;
+}
+function updateRelayStatus(){
+  const config = getRelayConfig();
+  const status = document.getElementById('relaySaved');
+  if(config.url){
+    status.textContent = '已儲存 ' + providerLabel(config.provider) + ' Relay（僅存在此瀏覽器）';
+  }else{
+    status.textContent = '尚未設定；不使用 AI 功能可略過。';
+  }
+}
+
+let STATE = {
+  config: { examDate:"", reviewDays:7, subjects:[] },
+  dailyLog: {}, // { date: { subjectId: amount } }
+  notesList: [], // { id, subjectId, filename, uploadedAt, chars }
+  consolidated: {}, // subjectId -> text
+  mockHistory: [] // { id, date, subjectIds, score, feedback }
+};
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function uid(){ return Math.random().toString(36).slice(2,10); }
+
+async function loadState(){
+  try{
+    const r = await window.storage.get('planner-state');
+    if(r && r.value){ STATE = JSON.parse(r.value); }
+  }catch(e){ console.log('no existing state, starting fresh'); }
+}
+
+function showStorageError(){
+  document.getElementById('storageErrorBanner').style.display = 'block';
+}
+function hideStorageError(){
+  document.getElementById('storageErrorBanner').style.display = 'none';
+}
+async function safeStorageSet(key, value, shared=false, retries=2){
+  let lastErr;
+  for(let i=0;i<=retries;i++){
+    try{
+      const r = await window.storage.set(key, value, shared);
+      if(!r) throw new Error('empty result from storage.set');
+      return r;
+    }catch(e){
+      lastErr = e;
+      console.error(`storage set failed (attempt ${i+1}/${retries+1}) for key "${key}":`, e);
+      if(i<retries) await new Promise(res=>setTimeout(res, 500*(i+1)));
+    }
+  }
+  throw lastErr;
+}
+let lastSaveFn = null;
+async function saveState(){
+  lastSaveFn = saveState;
+  try{
+    await safeStorageSet('planner-state', JSON.stringify(STATE));
+    hideStorageError();
+  }catch(e){
+    showStorageError();
+  }
+}
+document.getElementById('retrySaveBtn').addEventListener('click', async ()=>{
+  if(lastSaveFn) await lastSaveFn();
+});
+
+// ---------- Tabs ----------
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='daily') renderDaily();
+    if(btn.dataset.tab==='notes') renderNotes();
+    if(btn.dataset.tab==='consolidate') renderConsolidateSelect();
+    if(btn.dataset.tab==='mock') renderMock();
+  });
+});
+
+// ---------- Setup ----------
+function renderSubjectRows(){
+  const wrap = document.getElementById('subjectRows');
+  const openState = {};
+  wrap.querySelectorAll('details').forEach((d,idx)=>{ openState[idx] = d.open; });
+  wrap.innerHTML = '';
+  STATE.config.subjects.forEach((s,i)=>{
+    if(!s.chapters) s.chapters = [];
+    const total = subjectTotal(s);
+    const isOpen = openState[i]!==undefined ? openState[i] : s.chapters.length<=6;
+    const box = document.createElement('div');
+    box.className='subject-card';
+    box.innerHTML = `
+      <div class="subject-row">
+        <input type="text" placeholder="科目名稱" value="${escapeHtml(s.name||'')}" data-field="name" data-idx="${i}">
+        <input type="text" placeholder="單位（章/頁/小時）" value="${escapeHtml(s.unit||'')}" data-field="unit" data-idx="${i}" style="max-width:110px">
+        ${s.chapters.length===0
+          ? `<input type="number" placeholder="總量" value="${s.total||''}" data-field="total" data-idx="${i}" style="max-width:90px">`
+          : `<span class="muted" style="min-width:100px; text-align:right">共 ${total} ${escapeHtml(s.unit||'')}</span>`}
+        <button class="btn danger" data-del="${i}" style="padding:6px 10px">刪除科目</button>
+      </div>
+      <details class="chapters-box" ${isOpen?'open':''}>
+        <summary>
+          章節清單
+          ${s.chapters.length ? `<span class="pill ${s.chapters.every(c=>c.done)?'ok':'warn'}">${s.chapters.filter(c=>c.done).length}/${s.chapters.length} 已完成</span>` : '<span class="muted">尚未新增</span>'}
+        </summary>
+        <div class="quick-add-row" style="display:flex; gap:8px; align-items:center; margin-bottom:10px">
+          <input type="number" min="1" placeholder="章數，例如 27" style="max-width:90px" data-quickcount="${i}">
+          <button class="btn secondary" data-quickgen="${i}" style="padding:4px 10px">一次產生「第N章」（之後可自行改名）</button>
+          <button class="btn secondary" data-addchapter="${i}" style="padding:4px 10px">+ 單獨新增</button>
+        </div>
+        <div class="chapter-rows">
+          ${s.chapters.map((c,ci)=>`
+            <div class="chapter-row">
+              <input type="checkbox" ${c.done?'checked':''} title="已完成" data-cfield="done" data-idx="${i}" data-cidx="${ci}">
+              <input type="text" placeholder="章節名稱" value="${escapeHtml(c.name||'')}" data-cfield="name" data-idx="${i}" data-cidx="${ci}">
+              <button class="btn danger" data-delchapter="${i}" data-cidx="${ci}">×</button>
+            </div>
+          `).join('') || '<div class="muted" style="padding:4px 0">尚未新增章節，將以上方「總量」數字排程。</div>'}
+        </div>
+      </details>
+    `;
+    wrap.appendChild(box);
+  });
+  wrap.querySelectorAll('input[data-field]').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const idx = +e.target.dataset.idx, field = e.target.dataset.field;
+      STATE.config.subjects[idx][field] = field==='total' ? Number(e.target.value) : e.target.value;
+    });
+  });
+  wrap.querySelectorAll('input[data-cfield]').forEach(inp=>{
+    const evt = inp.type==='checkbox' ? 'change' : 'input';
+    inp.addEventListener(evt, e=>{
+      const idx = +e.target.dataset.idx, cidx = +e.target.dataset.cidx, field = e.target.dataset.cfield;
+      const chapter = STATE.config.subjects[idx].chapters[cidx];
+      if(field==='amount') chapter.amount = Number(e.target.value)||1;
+      else if(field==='done'){
+        chapter.done = e.target.checked; chapter.doneDate = e.target.checked ? todayStr() : null;
+        renderSubjectRows();
+        return;
+      }
+      else chapter.name = e.target.value;
+    });
+  });
+  wrap.querySelectorAll('[data-del]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      STATE.config.subjects.splice(+b.dataset.del,1);
+      renderSubjectRows();
+    });
+  });
+  wrap.querySelectorAll('[data-addchapter]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const idx = +b.dataset.addchapter;
+      STATE.config.subjects[idx].chapters.push({id:uid(), name:'', amount:1, done:false, doneDate:null});
+      renderSubjectRows();
+    });
+  });
+  wrap.querySelectorAll('[data-quickgen]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const idx = +b.dataset.quickgen;
+      const countInput = wrap.querySelector(`input[data-quickcount="${idx}"]`);
+      const count = Number(countInput.value)||0;
+      if(count<=0) return;
+      const subj = STATE.config.subjects[idx];
+      const startAt = subj.chapters.length;
+      for(let n=1;n<=count;n++){
+        subj.chapters.push({id:uid(), name:`第${startAt+n}章`, amount:1, done:false, doneDate:null});
+      }
+      renderSubjectRows();
+    });
+  });
+  wrap.querySelectorAll('[data-delchapter]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const idx = +b.dataset.delchapter, cidx = +b.dataset.cidx;
+      STATE.config.subjects[idx].chapters.splice(cidx,1);
+      renderSubjectRows();
+    });
+  });
+}
+document.getElementById('addSubjectBtn').addEventListener('click', ()=>{
+  STATE.config.subjects.push({id:uid(), name:'', unit:'章', total:0, chapters:[]});
+  renderSubjectRows();
+});
+document.getElementById('saveSetupBtn').addEventListener('click', async ()=>{
+  STATE.config.examDate = document.getElementById('examDate').value;
+  STATE.config.reviewDays = Number(document.getElementById('reviewDays').value)||0;
+  STATE.config.subjects.forEach(s=>{
+    if(s.chapters) s.chapters = s.chapters.filter(c=>c.name && c.name.trim());
+  });
+  STATE.config.subjects = STATE.config.subjects.filter(s=> s.name && (s.total>0 || (s.chapters&&s.chapters.length>0)));
+  await saveState();
+  document.getElementById('setupSaved').textContent = '已儲存 ✓ '+new Date().toLocaleTimeString('zh-TW');
+  renderSubjectRows();
+  renderCountdown();
+  refreshAllSelects();
+});
+
+function escapeHtml(str){
+  const d = document.createElement('div'); d.textContent = str||''; return d.innerHTML;
+}
+
+// ---------- Scheduling core ----------
+function daysBetween(a,b){ // a,b = 'YYYY-MM-DD', returns b-a in days
+  const A = new Date(a+'T00:00:00'), B = new Date(b+'T00:00:00');
+  return Math.round((B-A)/86400000);
+}
+function chapterMode(s){ return !!(s.chapters && s.chapters.length>0); }
+function subjectTotal(s){
+  return chapterMode(s) ? s.chapters.reduce((a,c)=>a+(c.amount||1),0) : (s.total||0);
+}
+function completedAmount(subjectId){ // legacy numeric-mode log
+  let sum = 0;
+  for(const date in STATE.dailyLog){
+    const v = STATE.dailyLog[date][subjectId];
+    if(v) sum += v;
+  }
+  return sum;
+}
+function subjectCompleted(s){
+  return chapterMode(s) ? s.chapters.filter(c=>c.done).reduce((a,c)=>a+(c.amount||1),0) : completedAmount(s.id);
+}
+function suggestChapters(s, targetAmount){
+  const undone = s.chapters.filter(c=>!c.done);
+  if(undone.length===0 || targetAmount<=0) return [];
+  let acc=0, picked=[];
+  for(const c of undone){
+    picked.push(c);
+    acc += (c.amount||1);
+    if(acc>=targetAmount) break;
+  }
+  return picked;
+}
+function isReviewDay(dateStr){
+  const cfg = STATE.config;
+  if(!cfg.examDate) return false;
+  const toExam = daysBetween(dateStr, cfg.examDate);
+  return toExam >= 0 && toExam < cfg.reviewDays;
+}
+function remainingStudyDays(fromDate){
+  const cfg = STATE.config;
+  if(!cfg.examDate) return 1;
+  const reviewStart = new Date(cfg.examDate+'T00:00:00');
+  reviewStart.setDate(reviewStart.getDate() - cfg.reviewDays);
+  const reviewStartStr = reviewStart.toISOString().slice(0,10);
+  const d = daysBetween(fromDate, reviewStartStr);
+  return Math.max(d, 1);
+}
+function plannedFor(dateStr){
+  const cfg = STATE.config;
+  const remDays = remainingStudyDays(dateStr);
+  return cfg.subjects.map(s=>{
+    const total = subjectTotal(s);
+    const done = subjectCompleted(s);
+    const remaining = Math.max(total - done, 0);
+    const planned = remaining>0 ? Math.ceil(remaining/remDays) : 0;
+    const cMode = chapterMode(s);
+    const suggested = cMode ? suggestChapters(s, planned) : [];
+    return {...s, total, done, remaining, planned, chapterMode:cMode, suggested};
+  });
+}
+
+// ---------- Countdown bar ----------
+function renderCountdown(){
+  const cfg = STATE.config;
+  const bar = document.getElementById('countdownBar');
+  if(!cfg.examDate || cfg.subjects.length===0){ bar.style.display='none'; return; }
+  bar.style.display='block';
+  const today = todayStr();
+  const totalDays = Math.max(daysBetween(today, cfg.examDate),0);
+  const totalPlanned = cfg.subjects.reduce((a,s)=>a+subjectTotal(s),0);
+  const totalDone = cfg.subjects.reduce((a,s)=>a+subjectCompleted(s),0);
+  const pct = totalPlanned>0 ? Math.min(100, Math.round(totalDone/totalPlanned*100)) : 0;
+  document.getElementById('cdText').textContent = `整體進度 ${pct}%（${totalDone}/${totalPlanned}）`;
+  document.getElementById('cdDays').textContent = `距離考試 ${totalDays} 天`;
+  document.getElementById('cdFill').style.width = pct+'%';
+  // review segment position
+  const reviewWidthPct = totalDays>0 ? Math.min(100, cfg.reviewDays/ (totalDays+cfg.reviewDays) * 100) : 0;
+  const rev = document.getElementById('cdReview');
+  rev.style.right = '0%'; rev.style.width = reviewWidthPct+'%';
+}
+
+// ---------- Daily panel ----------
+function renderDaily(){
+  const card = document.getElementById('dailyCard');
+  const cfg = STATE.config;
+  if(!cfg.examDate || cfg.subjects.length===0){
+    card.innerHTML = `<div class="empty">請先到「設定」頁填寫考試日期與科目。</div>`;
+    document.getElementById('forecast').innerHTML='';
+    document.getElementById('backfillRows').innerHTML = '<div class="empty">請先到「設定」頁新增科目。</div>';
+    document.getElementById('historyLog').innerHTML = '';
+    return;
+  }
+  const today = todayStr();
+  document.getElementById('todayLabel').textContent = today;
+  if(isReviewDay(today)){
+    const consolidatedSubjects = Object.keys(STATE.consolidated).filter(id=>STATE.consolidated[id]);
+    card.innerHTML = `
+      <h3>📖 今天是總複習日</h3>
+      <p class="muted">不排新進度，建議複習已統整的筆記，或到「模擬考」頁自我測驗。</p>
+      ${consolidatedSubjects.length ? '<p>已完成統整筆記的科目：'+consolidatedSubjects.map(id=>{
+        const s = cfg.subjects.find(x=>x.id===id); return s? escapeHtml(s.name):'';
+      }).join('、')+'</p>' : '<p class="muted">目前尚無統整筆記，建議先到「總複習」頁面產生。</p>'}
+    `;
+  } else {
+    card.innerHTML = `<h3>今日建議進度</h3><div id="taskRows"></div>
+      <button class="btn" id="saveTodayBtn" style="margin-top:10px">儲存今日完成量</button>
+      <span id="todaySaved" class="muted" style="margin-left:10px"></span>`;
+    const rows = document.getElementById('taskRows');
+    buildProgressRows(rows, today);
+    document.getElementById('saveTodayBtn').addEventListener('click', async ()=>{
+      await saveProgressForm(rows, today);
+      document.getElementById('todaySaved').textContent = '已儲存，明日進度將自動重新計算 ✓';
+      renderCountdown();
+      buildProgressRows(rows, today);
+    });
+  }
+  // 7 day forecast (projection assuming plan completed exactly)
+  const fc = document.getElementById('forecast');
+  let html = '<table><tr><th>日期</th><th>類型</th><th>建議內容</th></tr>';
+  const projCompleted = {}; // simulate
+  cfg.subjects.forEach(s=> projCompleted[s.id] = subjectCompleted(s));
+  for(let i=0;i<7;i++){
+    const d = new Date(); d.setDate(d.getDate()+i);
+    const ds = d.toISOString().slice(0,10);
+    if(isReviewDay(ds)){
+      html += `<tr><td>${ds}</td><td><span class="pill warn">總複習</span></td><td class="muted">複習統整筆記／模擬考</td></tr>`;
+    } else {
+      const remDays = remainingStudyDays(ds);
+      const parts = cfg.subjects.map(s=>{
+        const total = subjectTotal(s);
+        const remaining = Math.max(total - projCompleted[s.id],0);
+        const planned = remaining>0? Math.ceil(remaining/remDays):0;
+        projCompleted[s.id] += planned;
+        return planned>0 ? `${s.name} ${planned}${s.unit}` : null;
+      }).filter(Boolean);
+      html += `<tr><td>${ds}</td><td><span class="pill ok">讀書日</span></td><td>${parts.join('、')||'—'}</td></tr>`;
+    }
+  }
+  html += '</table>';
+  fc.innerHTML = html;
+
+  renderBackfill();
+  renderHistoryLog();
+}
+
+// ---------- Shared progress form (used by today + backfill) ----------
+function buildProgressRows(containerEl, date){
+  const tasks = plannedFor(date);
+  const legacyLog = STATE.dailyLog[date] || {};
+  containerEl.innerHTML = tasks.map(t=>{
+    const statusPill = t.planned===0 ? '<span class="pill ok">已完成</span>' : '';
+    const header = `<div class="task-row">
+      <div class="name">${escapeHtml(t.name)} ${statusPill}</div>
+      <div class="target">建議 ${t.planned} ${escapeHtml(t.unit)}（剩 ${t.remaining}）</div>
+      ${t.chapterMode ? '' : `<input type="number" min="0" data-sid="${t.id}" placeholder="完成量" value="${legacyLog[t.id]!==undefined?legacyLog[t.id]:''}">`}
+    </div>`;
+    if(!t.chapterMode) return header;
+    const undoneChapters = (t.chapters||[]).filter(c=>!c.done);
+    if(undoneChapters.length===0) return header;
+    const suggestedIds = new Set(t.suggested.map(c=>c.id));
+    const checklist = `<div class="chapter-check-list">` + undoneChapters.map(c=>{
+      const isSuggested = suggestedIds.has(c.id);
+      return `<label class="chapter-check ${isSuggested?'suggested':''}">
+        <input type="checkbox" data-chk-sid="${t.id}" data-chk-cid="${c.id}">
+        ${escapeHtml(c.name)}
+        ${isSuggested?'<span class="pill warn">建議</span>':''}
+      </label>`;
+    }).join('') + `</div>`;
+    return header + checklist;
+  }).join('');
+}
+async function saveProgressForm(containerEl, date){
+  const cfg = STATE.config;
+  const numericInputs = containerEl.querySelectorAll('input[data-sid]');
+  if(numericInputs.length){
+    if(!STATE.dailyLog[date]) STATE.dailyLog[date] = {};
+    numericInputs.forEach(inp=>{
+      STATE.dailyLog[date][inp.dataset.sid] = Number(inp.value)||0;
+    });
+  }
+  containerEl.querySelectorAll('input[data-chk-sid]:checked').forEach(chk=>{
+    const subj = cfg.subjects.find(s=>s.id===chk.dataset.chkSid);
+    if(!subj) return;
+    const chapter = (subj.chapters||[]).find(c=>c.id===chk.dataset.chkCid);
+    if(chapter){ chapter.done = true; chapter.doneDate = date; }
+  });
+  await saveState();
+}
+
+// ---------- Backfill / history ----------
+function renderBackfill(){
+  const dateInput = document.getElementById('backfillDate');
+  if(!dateInput.value) dateInput.value = todayStr();
+  const cfg = STATE.config;
+  const wrap = document.getElementById('backfillRows');
+  if(cfg.subjects.length===0){ wrap.innerHTML = '<div class="empty">請先到「設定」頁新增科目。</div>'; return; }
+  buildProgressRows(wrap, dateInput.value);
+}
+document.getElementById('backfillDate').addEventListener('change', renderBackfill);
+document.getElementById('saveBackfillBtn').addEventListener('click', async ()=>{
+  const date = document.getElementById('backfillDate').value;
+  if(!date) return;
+  const wrap = document.getElementById('backfillRows');
+  await saveProgressForm(wrap, date);
+  document.getElementById('backfillSaved').textContent = '已儲存 ✓ 後續進度已自動重新計算';
+  renderDaily();
+});
+
+function buildHistoryByDate(){
+  const map = {};
+  for(const date in STATE.dailyLog){
+    for(const sid in STATE.dailyLog[date]){
+      const s = STATE.config.subjects.find(x=>x.id===sid);
+      if(!s || chapterMode(s)) continue;
+      const amt = STATE.dailyLog[date][sid];
+      if(!amt) continue;
+      (map[date] = map[date]||[]).push(`${escapeHtml(s.name)} ${amt}${escapeHtml(s.unit)}`);
+    }
+  }
+  STATE.config.subjects.forEach(s=>{
+    if(!chapterMode(s)) return;
+    (s.chapters||[]).forEach(c=>{
+      if(c.done && c.doneDate){
+        (map[c.doneDate] = map[c.doneDate]||[]).push(`${escapeHtml(s.name)}：${escapeHtml(c.name)}`);
+      }
+    });
+  });
+  return map;
+}
+
+function renderHistoryLog(){
+  const wrap = document.getElementById('historyLog');
+  const map = buildHistoryByDate();
+  const dates = Object.keys(map).sort().reverse();
+  if(dates.length===0){ wrap.innerHTML = '<div class="empty">尚無任何紀錄。</div>'; return; }
+  wrap.innerHTML = '<table><tr><th>日期</th><th>完成內容</th><th></th></tr>' + dates.map(date=>{
+    return `<tr>
+      <td>${date}</td>
+      <td>${map[date].join('、')}</td>
+      <td style="white-space:nowrap">
+        <button class="btn secondary" style="padding:4px 10px" data-edit="${date}">編輯</button>
+        <button class="btn danger" style="padding:4px 10px" data-deldate="${date}">刪除</button>
+      </td>
+    </tr>`;
+  }).join('') + '</table>';
+  wrap.querySelectorAll('[data-edit]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.getElementById('backfillDate').value = b.dataset.edit;
+      renderBackfill();
+      document.getElementById('backfillDate').scrollIntoView({behavior:'smooth', block:'center'});
+    });
+  });
+  wrap.querySelectorAll('[data-deldate]').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const date = b.dataset.deldate;
+      delete STATE.dailyLog[date];
+      STATE.config.subjects.forEach(s=>{
+        (s.chapters||[]).forEach(c=>{
+          if(c.doneDate===date){ c.done=false; c.doneDate=null; }
+        });
+      });
+      await saveState();
+      renderDaily();
+    });
+  });
+}
+
+// ---------- Notes panel ----------
+function refreshAllSelects(){
+  const opts = STATE.config.subjects.map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+  ['noteSubjectSelect','consolidateSubjectSelect'].forEach(id=>{
+    const el = document.getElementById(id);
+    const cur = el.value;
+    el.innerHTML = opts || '<option value="">請先新增科目</option>';
+    if(cur) el.value = cur;
+  });
+  refreshNoteChapterSelect();
+  const checkWrap = document.getElementById('mockSubjectChecks');
+  checkWrap.innerHTML = STATE.config.subjects.map(s=>
+    `<label><input type="checkbox" value="${s.id}" checked> ${escapeHtml(s.name)}</label>`
+  ).join('') || '<span class="muted">請先新增科目</span>';
+}
+function refreshNoteChapterSelect(){
+  const subjectId = document.getElementById('noteSubjectSelect').value;
+  const chapterSelect = document.getElementById('noteChapterSelect');
+  const subj = STATE.config.subjects.find(s=>s.id===subjectId);
+  const chapters = (subj && subj.chapters) ? subj.chapters : [];
+  chapterSelect.innerHTML = '<option value="">— 不指定章節 —</option>' +
+    chapters.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+}
+document.getElementById('noteSubjectSelect').addEventListener('change', refreshNoteChapterSelect);
+
+// ---------- OCR helpers (for scanned PDFs / photographed notes) ----------
+async function ocrImageViaAI(base64, mediaType){
+  const data = await relayRequest('/study', {
+    prompt: '請將這張筆記圖片中的文字內容忠實轉錄成純文字，保留條列與段落結構，不要摘要、不要加入自己的解讀或補充。若為手寫字跡且有辨識不清的部分，請標記【無法辨識】。只輸出轉錄後的文字內容。',
+    maxTokens: 1000,
+    image: {data:base64, mediaType:mediaType}
+  });
+  if(!data || typeof data.text !== 'string') throw new Error('AI 未傳回可用的辨識文字');
+  return data.text;
+}
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onload = ()=> resolve(r.result.split(',')[1]);
+    r.onerror = ()=> reject(new Error('讀取檔案失敗'));
+    r.readAsDataURL(file);
+  });
+}
+async function ocrPdfViaVision(pdf, onProgress){
+  let text = '';
+  const maxPages = Math.min(pdf.numPages, 15);
+  for(let p=1;p<=maxPages;p++){
+    onProgress(p, maxPages);
+    const page = await pdf.getPage(p);
+    const viewport = page.getViewport({scale:1.5});
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+    const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+    const pageText = await ocrImageViaAI(base64, 'image/jpeg');
+    text += `\n【第${p}頁】\n${pageText}\n`;
+  }
+  if(pdf.numPages > maxPages) text += `\n（僅辨識前 ${maxPages} 頁，剩餘頁數請拆開分批上傳）`;
+  return text;
+}
+
+document.getElementById('pdfInput').addEventListener('change', async (e)=>{
+  const subjectId = document.getElementById('noteSubjectSelect').value;
+  const chapterId = document.getElementById('noteChapterSelect').value || null;
+  if(!subjectId){ document.getElementById('uploadStatus').textContent = '請先選擇科目'; return; }
+  const files = Array.from(e.target.files);
+  const statusEl = document.getElementById('uploadStatus');
+  for(const file of files){
+    statusEl.textContent = `處理中：${file.name} ...`;
+    try{
+      let text = '';
+      if(file.type === 'application/pdf'){
+        const buf = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({
+          data: buf,
+          cMapUrl: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/",
+          cMapPacked: true
+        }).promise;
+        let rawText = '';
+        for(let p=1;p<=pdf.numPages;p++){
+          const page = await pdf.getPage(p);
+          const content = await page.getTextContent();
+          rawText += content.items.map(it=>it.str).join(' ') + '\n';
+        }
+        const meaningfulChars = rawText.replace(/\s/g,'').length;
+        if(meaningfulChars / Math.max(pdf.numPages,1) < 20){
+          // looks like a scanned PDF with little/no text layer -> fall back to AI image OCR
+          statusEl.textContent = `偵測到「${file.name}」像是掃描檔，改用 AI 影像辨識中...`;
+          text = await ocrPdfViaVision(pdf, (p,total)=>{ statusEl.textContent = `AI 辨識「${file.name}」第 ${p}/${total} 頁...`; });
+        } else {
+          text = rawText;
+        }
+      } else if(file.type.startsWith('image/')){
+        statusEl.textContent = `AI 辨識圖片「${file.name}」中...`;
+        const base64 = await fileToBase64(file);
+        text = await ocrImageViaAI(base64, file.type);
+      } else {
+        statusEl.textContent = `不支援的檔案類型：${file.name}`;
+        continue;
+      }
+      const id = uid();
+      try{
+        await safeStorageSet('note-text:'+id, text.slice(0, 400000)); // safety cap
+      }catch(storageErr){
+        statusEl.textContent = `儲存失敗：${file.name}（網路或伺服器問題，請稍後重試上傳）`;
+        showStorageError();
+        continue;
+      }
+      STATE.notesList.push({id, subjectId, chapterId, filename:file.name, uploadedAt:new Date().toISOString(), chars:text.length});
+      await saveState();
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = `讀取失敗：${file.name}（${err.message||'可能為加密檔或格式不支援'}）`;
+    }
+  }
+  statusEl.textContent = '上傳完成 ✓';
+  renderNotes();
+  e.target.value = '';
+});
+
+function renderNotes(){
+  const wrap = document.getElementById('notesList');
+  if(STATE.notesList.length===0){ wrap.innerHTML = '<div class="empty">尚未上傳任何筆記。</div>'; return; }
+  wrap.innerHTML = STATE.notesList.map(n=>{
+    const s = STATE.config.subjects.find(x=>x.id===n.subjectId);
+    const chapter = (s && s.chapters) ? s.chapters.find(c=>c.id===n.chapterId) : null;
+    const tag = [s?escapeHtml(s.name):'未分類', chapter?escapeHtml(chapter.name):null].filter(Boolean).join(' · ');
+    return `<div class="note-item">
+      <span>${escapeHtml(n.filename)} <small>（${tag} · 約 ${n.chars} 字）</small></span>
+      <button class="btn danger" style="padding:4px 10px" data-delnote="${n.id}">刪除</button>
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('[data-delnote]').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const id = b.dataset.delnote;
+      STATE.notesList = STATE.notesList.filter(n=>n.id!==id);
+      try{ await window.storage.delete('note-text:'+id); }catch(e){}
+      await saveState();
+      renderNotes();
+    });
+  });
+}
+
+// ---------- AI Relay helper ----------
+async function callAI(prompt, maxTokens){
+  const data = await relayRequest('/study', {
+    prompt: String(prompt||''),
+    maxTokens: maxTokens || 1000
+  });
+  if(!data || typeof data.text !== 'string') throw new Error('AI 未傳回可用文字');
+  return data.text;
+}
+function stripJsonFence(text){
+  return text.replace(/```json|```/g,'').trim();
+}
+
+// ---------- Consolidate ----------
+function renderConsolidateSelect(){
+  const sel = document.getElementById('consolidateSubjectSelect');
+  const subjectId = sel.value;
+  document.getElementById('consolidateOutput').value = STATE.consolidated[subjectId] || '';
+}
+document.getElementById('consolidateSubjectSelect').addEventListener('change', renderConsolidateSelect);
+
+document.getElementById('consolidateBtn').addEventListener('click', async ()=>{
+  const subjectId = document.getElementById('consolidateSubjectSelect').value;
+  if(!subjectId){ alert('請先設定科目'); return; }
+  const notes = STATE.notesList.filter(n=>n.subjectId===subjectId);
+  if(notes.length===0){ document.getElementById('consolidateStatus').textContent = '此科目尚未上傳任何筆記。'; return; }
+  document.getElementById('consolidateStatus').textContent = '正在讀取筆記並請 AI 統整，請稍候...';
+  let combined = '';
+  for(const n of notes){
+    try{
+      const r = await window.storage.get('note-text:'+n.id);
+      combined += `\n\n【${n.filename}】\n` + (r?r.value:'');
+    }catch(e){}
+  }
+  combined = combined.slice(0, 12000); // keep prompt manageable
+  const subj = STATE.config.subjects.find(s=>s.id===subjectId);
+  const prompt = `你是備考讀書助理。以下是「${subj.name}」科目的原始筆記內容（可能來自多份 PDF，內容或有重複）：\n\n${combined}\n\n請將這些筆記統整為一份精簡、結構化的「最終複習筆記」，使用繁體中文，內容包含：\n1. 核心概念條列（含定義）\n2. 重要公式／模型／方法（如適用）\n3. 常見誤解或考試易錯點\n4. 概念之間的關聯或比較表\n只輸出統整後的筆記內容（可用 markdown 標題與條列），不要有其他說明文字。`;
+  try{
+    const result = await callAI(prompt, 1000);
+    document.getElementById('consolidateOutput').value = result;
+    document.getElementById('consolidateStatus').textContent = '完成 ✓ 可直接編輯後儲存。';
+  }catch(e){
+    console.error(e);
+    document.getElementById('consolidateStatus').textContent = 'AI 統整失敗：' + (e.message||'請稍後再試。');
+  }
+});
+document.getElementById('saveConsolidateBtn').addEventListener('click', async ()=>{
+  const subjectId = document.getElementById('consolidateSubjectSelect').value;
+  if(!subjectId) return;
+  STATE.consolidated[subjectId] = document.getElementById('consolidateOutput').value;
+  await saveState();
+  document.getElementById('consolidateStatus').textContent = '已儲存 ✓';
+});
+
+// ---------- Mock exam ----------
+let currentMockQuestions = [];
+function renderMock(){
+  const wrap = document.getElementById('mockHistory');
+  if(STATE.mockHistory.length===0){ wrap.innerHTML = '<div class="empty">尚無模擬考紀錄。</div>'; return; }
+  wrap.innerHTML = '<table><tr><th>日期</th><th>科目</th><th>平均分數</th></tr>' +
+    STATE.mockHistory.slice().reverse().map(m=>{
+      const names = m.subjectIds.map(id=>{const s=STATE.config.subjects.find(x=>x.id===id); return s?s.name:'';}).join('、');
+      return `<tr><td>${m.date}</td><td>${escapeHtml(names)}</td><td>${m.score}</td></tr>`;
+    }).join('') + '</table>';
+}
+
+document.getElementById('genMockBtn').addEventListener('click', async ()=>{
+  const checks = Array.from(document.querySelectorAll('#mockSubjectChecks input:checked')).map(c=>c.value);
+  if(checks.length===0){ alert('請至少選擇一個科目'); return; }
+  const count = Number(document.getElementById('mockCount').value)||5;
+  document.getElementById('mockStatus').textContent = '正在準備出題材料...';
+  let context = '';
+  for(const sid of checks){
+    const s = STATE.config.subjects.find(x=>x.id===sid);
+    if(STATE.consolidated[sid]){
+      context += `\n\n【${s.name} 統整筆記】\n${STATE.consolidated[sid]}`;
+    } else {
+      const notes = STATE.notesList.filter(n=>n.subjectId===sid);
+      for(const n of notes.slice(0,2)){
+        try{ const r = await window.storage.get('note-text:'+n.id); context += `\n\n【${s.name} - ${n.filename}】\n${(r?r.value:'').slice(0,3000)}`; }catch(e){}
+      }
+    }
+  }
+  context = context.slice(0, 10000);
+  const prompt = `你是備考出題老師。根據以下複習資料，出 ${count} 題考試等級的申論／概念題（不要選擇題），涵蓋核心概念、批判思考與應用。\n\n資料：\n${context}\n\n請只輸出 JSON 陣列，格式為 [{"q":"題目內容"}, ...]，不要有其他文字或 markdown 標記。`;
+  try{
+    const result = await callAI(prompt, 1000);
+    const parsed = JSON.parse(stripJsonFence(result));
+    currentMockQuestions = parsed.map(p=>({id:uid(), q:p.q, answer:'', subjectIds:checks}));
+    renderMockQuestions();
+    document.getElementById('mockStatus').textContent = '出題完成 ✓';
+  }catch(e){
+    console.error(e);
+    document.getElementById('mockStatus').textContent = '出題失敗：' + (e.message||'請稍後再試。');
+  }
+});
+
+function renderMockQuestions(){
+  const card = document.getElementById('mockQuestionsCard');
+  const wrap = document.getElementById('mockQuestions');
+  card.style.display = 'block';
+  wrap.innerHTML = currentMockQuestions.map((q,i)=>`
+    <div class="q-block" data-qid="${q.id}">
+      <div><strong>Q${i+1}.</strong> ${escapeHtml(q.q)}</div>
+      <textarea placeholder="輸入你的作答..." data-answer="${q.id}"></textarea>
+    </div>
+  `).join('');
+  document.getElementById('gradeStatus').textContent = '';
+}
+
+document.getElementById('gradeMockBtn').addEventListener('click', async ()=>{
+  document.querySelectorAll('[data-answer]').forEach(t=>{
+    const q = currentMockQuestions.find(x=>x.id===t.dataset.answer);
+    if(q) q.answer = t.value;
+  });
+  document.getElementById('gradeStatus').textContent = 'AI 評分中...';
+  const qaText = currentMockQuestions.map((q,i)=>`Q${i+1}: ${q.q}\n作答: ${q.answer||'（未作答）'}`).join('\n\n');
+  const prompt = `你是備考評分老師。請針對以下題目與作答評分，每題給 0-10 分並附一句簡短回饋（繁體中文）。\n\n${qaText}\n\n只輸出 JSON：{"items":[{"score":數字,"feedback":"一句話回饋"},...],"overall":數字,"summary":"一句總評"}，不要其他文字。`;
+  try{
+    const result = await callAI(prompt, 1000);
+    const parsed = JSON.parse(stripJsonFence(result));
+    parsed.items.forEach((it,i)=>{
+      const block = document.querySelectorAll('.q-block')[i];
+      if(block){
+        const scoreEl = document.createElement('div');
+        scoreEl.innerHTML = `<span class="score">${it.score}/10</span><div class="muted">${escapeHtml(it.feedback)}</div>`;
+        block.appendChild(scoreEl);
+      }
+    });
+    document.getElementById('gradeStatus').textContent = `總評：${parsed.summary}（總分 ${parsed.overall}/10）`;
+    const checks = currentMockQuestions[0]?.subjectIds || [];
+    STATE.mockHistory.push({id:uid(), date:todayStr(), subjectIds:checks, score:parsed.overall, feedback:parsed.summary});
+    await saveState();
+    renderMock();
+  }catch(e){
+    console.error(e);
+    document.getElementById('gradeStatus').textContent = '評分失敗：' + (e.message||'請稍後再試。');
+  }
+});
+
+// ---------- Init ----------
+document.getElementById('saveRelayBtn').addEventListener('click', async ()=>{
+  const status = document.getElementById('relaySaved');
+  const candidate = {
+    provider: document.getElementById('relayProviderSelect').value,
+    url: document.getElementById('relayUrlInput').value,
+    token: document.getElementById('relayTokenInput').value
+  };
+  try{
+    candidate.url = normalizeRelayUrl(candidate.url);
+    status.textContent = '正在測試 Relay...';
+    const health = await testRelayConfig(candidate);
+    candidate.provider = health.provider === 'anthropic' ? 'anthropic' : 'openai';
+    setRelayConfig(candidate);
+    document.getElementById('relayProviderSelect').value = candidate.provider;
+    status.textContent = '已連接 ' + providerLabel(candidate.provider) + ' Relay ✓（僅存在此瀏覽器）';
+  }catch(e){
+    status.textContent = '連線失敗：' + (e.message || '請檢查網址、密碼與 Cloudflare 設定。');
+  }
+});
+document.getElementById('clearRelayBtn').addEventListener('click', ()=>{
+  clearRelayConfig();
+  document.getElementById('relayUrlInput').value = '';
+  document.getElementById('relayTokenInput').value = '';
+  updateRelayStatus();
+});
+document.getElementById('clearLegacyKeyBtn').addEventListener('click', ()=>{
+  localStorage.removeItem(LEGACY_API_KEY_STORAGE_KEY);
+  document.getElementById('clearLegacyKeyBtn').style.display = 'none';
+  document.getElementById('relaySaved').textContent = '舊版瀏覽器 API Key 已清除。';
+});
+
+(async function init(){
+  await loadState();
+  document.getElementById('examDate').value = STATE.config.examDate || '';
+  document.getElementById('reviewDays').value = STATE.config.reviewDays ?? 7;
+  const relay = getRelayConfig();
+  document.getElementById('relayProviderSelect').value = relay.provider;
+  document.getElementById('relayUrlInput').value = relay.url;
+  document.getElementById('relayTokenInput').value = relay.token;
+  if(localStorage.getItem(LEGACY_API_KEY_STORAGE_KEY)){
+    document.getElementById('clearLegacyKeyBtn').style.display = 'inline-block';
+  }
+  updateRelayStatus();
+  if(STATE.config.subjects.length===0){
+    STATE.config.subjects.push({id:uid(), name:'', unit:'章', total:0, chapters:[]});
+  }
+  renderSubjectRows();
+  refreshAllSelects();
+  renderCountdown();
+  document.getElementById('todayLabel').textContent = todayStr();
+})();
+</script>
+</body>
+</html>
