@@ -122,6 +122,43 @@
   .loading{color:var(--ink-soft); font-size:.85rem; font-style:italic;}
   .q-block{border:1px solid var(--line); border-radius:5px; padding:12px 14px; margin-bottom:12px; background:#fff;}
   .q-block .score{float:right; font-weight:700; color:var(--teal);}
+  /* 考古資料分成「可參考題目」與「考情指引」：後者只調整出題重點，不會被誤當作題目。 */
+  .exam-source-list{display:grid; gap:8px; margin-top:12px;}
+  .exam-source-item{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:5px; background:var(--paper);}
+  .exam-source-item.guidance{background:var(--amber-soft); border-color:#efd89d;}
+  .exam-source-copy{min-width:0; flex:1;}
+  .exam-source-title{font-size:.88rem; font-weight:700; color:var(--ink);}
+  .exam-source-meta{font-size:.75rem; color:var(--ink-soft); margin-top:2px;}
+  .exam-source-preview{font-size:.8rem; color:var(--ink-soft); margin-top:5px; white-space:pre-wrap;}
+  .source-badge{display:inline-block; font-size:.72rem; padding:2px 8px; border-radius:20px; font-weight:700; margin-right:5px;}
+  .source-badge.guidance{background:var(--amber); color:#fff;}
+  .source-badge.paper{background:var(--blue-soft); color:var(--blue);}
+  .source-badge.teacher{background:var(--pink-soft); color:var(--pink-dark);}
+  .exam-source-empty{padding:12px 0 2px; color:var(--ink-soft); font-size:.82rem; font-style:italic;}
+  /* 正式模式加入倒數與交卷節點，練習模式仍保留原本可隨時檢討的彈性。 */
+  .exam-mode-note{margin-top:8px; padding:8px 10px; background:var(--amber-soft); border-left:3px solid var(--amber); color:var(--ink-soft); font-size:.8rem;}
+  .exam-session-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; flex-wrap:wrap;}
+  .exam-session-meta{font-size:.82rem; color:var(--ink-soft);}
+  .exam-clock{font-variant-numeric:tabular-nums; font-family:var(--serif); font-size:1.15rem; font-weight:700; color:var(--burgundy); background:var(--burgundy-soft); padding:4px 10px; border-radius:20px;}
+  .exam-clock.warning{animation:pulse 1s ease-in-out infinite;}
+  @keyframes pulse{50%{opacity:.58;}}
+  .exam-submit-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
+  /* 頁尾以柔和資訊卡收尾，連結同一套學習工具但不干擾主要功能。 */
+  footer.site-footer{
+    display:grid; grid-template-columns:minmax(180px,.7fr) minmax(300px,1.5fr); align-items:center; gap:18px;
+    margin-top:34px; padding:15px 16px; border:1px solid #d5e2ef; border-radius:16px;
+    background:linear-gradient(105deg, rgba(226,237,248,.88), rgba(252,238,245,.78));
+    box-shadow:0 8px 20px rgba(91,143,199,.07); font-size:.76rem; line-height:1.65; color:var(--ink-soft);
+  }
+  .footer-brand{display:flex; align-items:center; gap:9px;}
+  .footer-seal{display:grid; place-items:center; width:26px; height:26px; border-radius:9px; background:var(--pink-soft); color:var(--pink-dark); font-size:.85rem; flex:none;}
+  .footer-title{display:block; font-family:var(--serif); font-size:.88rem; font-weight:700; color:var(--ink);}
+  .footer-tagline{display:block; margin-top:1px; font-size:.68rem; letter-spacing:.03em;}
+  .footer-meta{text-align:right; min-width:0;}
+  .footer-tool{display:inline-flex; align-items:center; gap:5px; margin:0 0 6px auto; padding:3px 8px; border:1px solid #c8d8ea; border-radius:20px; background:#fff; color:var(--blue); text-decoration:none; font-size:.72rem; font-weight:700;}
+  .footer-tool:hover{background:var(--blue-soft); border-color:var(--blue);}
+  .footer-copy{display:block; max-width:590px; margin-left:auto;}
+  .footer-copyright{display:block; margin-top:3px; font-size:.68rem;}
   .flex-between{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;}
   .muted{color:var(--ink-soft); font-size:.82rem;}
   .checkbox-list label{display:flex; align-items:center; gap:6px; font-size:.85rem; color:var(--ink); margin-bottom:4px;}
@@ -132,7 +169,36 @@
   }
   .storage-error button{margin-left:10px;}
   @media (max-width:640px){
-    .chapter-rows, .chapter-check-list{grid-template-columns:repeat(2, 1fr);}
+    /* 手機以單欄輸入為主，避免日期、題數與長標籤被壓縮成難以操作的寬度。 */
+    .app{padding:20px 14px 46px;}
+    header.top{align-items:flex-start; flex-direction:column; gap:3px; margin-bottom:14px;}
+    header.top h1{font-size:1.35rem;}
+    .countdown-bar{padding:12px 14px;}
+    nav.tabs{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; margin-bottom:16px;}
+    nav.tabs button{width:100%; min-height:42px; padding:7px 8px; font-size:.8rem; line-height:1.25;}
+    .card{padding:16px 14px; margin-bottom:12px;}
+    .grid2{grid-template-columns:1fr; gap:10px;}
+    input[type=text], input[type=number], input[type=date], select, textarea{font-size:16px; min-height:42px;}
+    textarea{min-height:112px;}
+    .btn{min-height:40px; padding:8px 13px; line-height:1.35; white-space:normal;}
+    .subject-row,.task-row,.note-item{align-items:flex-start; flex-wrap:wrap;}
+    .subject-row .btn{width:100%;}
+    .task-row .target{width:auto; flex:1 1 160px;}
+    .task-row input{width:100%; max-width:150px;}
+    .note-item .btn{margin-left:auto;}
+    .chapter-rows, .chapter-check-list{grid-template-columns:repeat(2, minmax(0,1fr));}
+    .chapter-rows{gap:6px;}
+    .chapter-row{padding-left:5px;}
+    /* 歷史與預估表在小螢幕保留欄位資訊，改為卡片內左右滑動而非壓縮文字。 */
+    .card{overflow-x:auto;}
+    .card table{min-width:540px;}
+    .exam-session-head{align-items:flex-start;}
+    .exam-clock{font-size:1rem;}
+    .exam-submit-row .btn{width:100%;}
+    .exam-source-item{flex-direction:column;}
+    footer.site-footer{grid-template-columns:1fr; gap:10px;}
+    .footer-meta,.footer-copy{text-align:left; margin-left:0;}
+    .footer-tool{margin-left:0;}
   }
 </style>
 </head>
@@ -203,10 +269,10 @@
         <label>Relay 存取密碼（建議設定）</label>
         <input type="password" id="relayTokenInput" placeholder="不是 OpenAI／Claude API Key">
       </div>
-      <button class="btn secondary" id="saveRelayBtn" style="margin-top:8px">測試並儲存 Relay</button>
-      <button class="btn secondary" id="clearRelayBtn" style="margin-top:8px">移除這台裝置的 Relay</button>
+      <button class="btn secondary" id="saveRelayBtn" style="margin-top:8px">連線測試</button>
+      <button class="btn secondary" id="clearRelayBtn" style="margin-top:8px">移除 Relay</button>
       <span id="relaySaved" class="muted" style="margin-left:10px"></span>
-      <button class="btn secondary" id="clearLegacyKeyBtn" style="display:none; margin-top:8px">清除舊版瀏覽器 API Key</button>
+      <button class="btn secondary" id="clearLegacyKeyBtn" style="display:none; margin-top:8px">清除舊 API Key</button>
       <details class="muted" style="margin-top:12px">
         <summary style="cursor:pointer; font-weight:600">第一次設定怎麼做？</summary>
         <ol style="margin:8px 0 0; padding-left:20px">
@@ -227,7 +293,7 @@
       <label>選擇日期</label>
       <input type="date" id="backfillDate">
       <div id="backfillRows" style="margin-top:10px"></div>
-      <button class="btn" id="saveBackfillBtn" style="margin-top:10px">儲存這一天的進度</button>
+      <button class="btn" id="saveBackfillBtn" style="margin-top:10px">儲存進度</button>
       <span id="backfillSaved" class="muted" style="margin-left:10px"></span>
     </div>
     <div class="card">
@@ -250,7 +316,7 @@
       </div>
       <div style="margin-top:10px"><label>選擇檔案（PDF 或圖片皆可，可多選）</label><input type="file" id="pdfInput" accept="application/pdf,image/*" multiple></div>
       <div id="uploadStatus" class="muted" style="margin-top:8px"></div>
-      <p class="muted" style="margin-top:4px">系統會先嘗試直接擷取文字；若偵測到是掃描檔／照片（沒有文字層），會改用 AI 影像辨識逐頁轉錄文字（含手寫辨識），處理時間會比較長。</p>
+      <p class="muted" style="margin-top:4px">PDF 會逐頁處理：純文字頁直接擷取；掃描頁、圖片頁與文字＋圖片混合頁會以 AI 視覺辨識補齊圖片、表格、圖表與手寫註記中的文字。含影像的頁面需要已設定 AI Relay，處理時間與 API 用量會隨頁數增加。</p>
     </div>
     <div class="card">
       <h3>已上傳筆記</h3>
@@ -266,7 +332,7 @@
           <label>選擇科目</label>
           <select id="consolidateSubjectSelect"></select>
         </div>
-        <button class="btn" id="consolidateBtn">AI 統整最終筆記</button>
+        <button class="btn" id="consolidateBtn">AI 統整筆記</button>
       </div>
       <div id="consolidateStatus" class="loading"></div>
       <textarea id="consolidateOutput" placeholder="尚未產生統整筆記。上傳該科目的 PDF 筆記後，點擊「AI 統整最終筆記」。"></textarea>
@@ -279,18 +345,51 @@
   <!-- MOCK EXAM -->
   <section class="panel" id="panel-mock">
     <div class="card">
+      <h3>考古資料與考情指引</h3>
+      <p class="muted">老師提供的「觀念為主、常考範圍、出題提醒」請選擇「考情指引」：它不會被當成題目，而是用來調整模擬考的出題權重。若有實際歷屆試題或回憶題，再選擇題目類型。</p>
+      <div class="grid2">
+        <div><label>所屬科目</label><select id="examSourceSubjectSelect"></select></div>
+        <div><label>資料類型</label><select id="examSourceType">
+          <option value="paper" selected>歷屆試題／回憶題</option>
+          <option value="teacher">老師提供題目</option>
+          <option value="guidance">考情指引（非題目）</option>
+        </select></div>
+      </div>
+      <div style="margin-top:10px"><label>標題</label><input type="text" id="examSourceTitle" placeholder="例如：老師期中考範圍提醒、112 年考題回憶"></div>
+      <div style="margin-top:10px"><label>內容</label><textarea id="examSourceContent" placeholder="貼上老師的文字建議、考題內容或整理後的考古題重點。"></textarea></div>
+      <div style="margin-top:10px"><label>或匯入 PDF 考古題（可多選）</label><input type="file" id="examSourcePdfInput" accept="application/pdf,.pdf" multiple></div>
+      <div id="examSourceImportStatus" class="muted" style="margin-top:6px"></div>
+      <p class="muted" style="margin-top:4px">PDF 會逐頁擷取文字；掃描頁、圖片頁與混合頁會以 AI 視覺辨識補齊內容。系統只存擷取文字，不會上傳或保存原始 PDF；含影像的頁面需要已設定 AI Relay。</p>
+      <button class="btn secondary" id="saveExamSourceBtn" style="margin-top:8px">加入資料庫</button>
+      <span id="examSourceSaved" class="muted" style="margin-left:10px"></span>
+      <div id="examSourceList" class="exam-source-list"></div>
+    </div>
+    <div class="card">
       <h3>產生模擬考</h3>
-      <label>納入科目（依統整筆記或原始筆記出題）</label>
+      <label>納入科目（依統整筆記、原始筆記與已選考古資料出題）</label>
       <div class="checkbox-list" id="mockSubjectChecks"></div>
       <div class="grid2" style="margin-top:8px">
-        <div><label>題數</label><input type="number" id="mockCount" value="5" min="1" max="10"></div>
-        <div style="align-self:end"><button class="btn" id="genMockBtn">生成模擬考</button></div>
+        <div><label>題數</label><input type="number" id="mockCount" value="5" min="1" max="30"></div>
+        <div><label>作答模式</label><select id="mockMode"><option value="practice">練習模式（不限時）</option><option value="exam">考試模式（倒數後交卷）</option></select></div>
       </div>
+      <div class="grid2" style="margin-top:8px">
+        <div><label>考試時間（分鐘）</label><input type="number" id="mockDuration" value="30" min="1" max="300"></div>
+        <div style="align-self:end"><label class="checkbox-list" style="margin:0"><input type="checkbox" id="mockUseGuidance" checked>納入考情指引調整出題方向</label></div>
+      </div>
+      <div id="mockModeNote" class="exam-mode-note">練習模式不計時；完成後可直接請 AI 評分與檢討。</div>
+      <button class="btn" id="genMockBtn" style="margin-top:12px">生成模擬考</button>
       <div id="mockStatus" class="loading"></div>
     </div>
     <div class="card" id="mockQuestionsCard" style="display:none">
+      <div class="exam-session-head">
+        <div id="mockSessionMeta" class="exam-session-meta"></div>
+        <div id="mockTimer" class="exam-clock" hidden>00:00</div>
+      </div>
       <div id="mockQuestions"></div>
-      <button class="btn" id="gradeMockBtn">AI 評分</button>
+      <div class="exam-submit-row">
+        <button class="btn" id="gradeMockBtn">交卷評分</button>
+        <span id="mockSubmitHint" class="muted"></span>
+      </div>
       <div id="gradeStatus" class="loading"></div>
     </div>
     <div class="card">
@@ -298,6 +397,22 @@
       <div id="mockHistory"></div>
     </div>
   </section>
+
+  <!-- 頁尾只提供工具入口與本機儲存提醒，不會參與讀書計畫或模擬考資料。 -->
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <span class="footer-seal" aria-hidden="true">🦢</span>
+      <div>
+        <span class="footer-title">CramGoose · 溫書鵝</span>
+        <span class="footer-tagline">plan steadily · review with purpose</span>
+      </div>
+    </div>
+    <div class="footer-meta">
+      <a class="footer-tool" href="https://jhen-1993.github.io/my-vocab-app/" target="_blank" rel="noopener noreferrer" title="開啟字卡圖書館">✦ 字卡圖書館 · Word Card Library <span aria-hidden="true">↗</span></a>
+      <span class="footer-copy">讀書計畫、筆記與考情資料只儲存在這個瀏覽器裡；換裝置或清除瀏覽器資料前，請先備份重要內容。</span>
+      <span class="footer-copyright">© 2026 Jhen-1993 · Personal study companion</span>
+    </div>
+  </footer>
 
 </div>
 
@@ -399,7 +514,8 @@ let STATE = {
   dailyLog: {}, // { date: { subjectId: amount } }
   notesList: [], // { id, subjectId, filename, uploadedAt, chars }
   consolidated: {}, // subjectId -> text
-  mockHistory: [] // { id, date, subjectIds, score, feedback }
+  mockHistory: [], // { id, date, subjectIds, score, feedback, mode }
+  examSources: [] // { id, subjectId, type: guidance|paper|teacher, title, content, createdAt }
 };
 
 function todayStr(){ return new Date().toISOString().slice(0,10); }
@@ -410,6 +526,15 @@ async function loadState(){
     const r = await window.storage.get('planner-state');
     if(r && r.value){ STATE = JSON.parse(r.value); }
   }catch(e){ console.log('no existing state, starting fresh'); }
+  // 向下相容舊版資料：只補齊新欄位，不會覆寫原本的讀書計畫、筆記或模擬考紀錄。
+  if(!STATE || typeof STATE !== 'object') STATE = {};
+  if(!STATE.config || typeof STATE.config !== 'object') STATE.config = { examDate:"", reviewDays:7, subjects:[] };
+  if(!Array.isArray(STATE.config.subjects)) STATE.config.subjects = [];
+  if(!STATE.dailyLog || typeof STATE.dailyLog !== 'object') STATE.dailyLog = {};
+  if(!Array.isArray(STATE.notesList)) STATE.notesList = [];
+  if(!STATE.consolidated || typeof STATE.consolidated !== 'object') STATE.consolidated = {};
+  if(!Array.isArray(STATE.mockHistory)) STATE.mockHistory = [];
+  if(!Array.isArray(STATE.examSources)) STATE.examSources = [];
 }
 
 function showStorageError(){
@@ -489,7 +614,7 @@ function renderSubjectRows(){
         </summary>
         <div class="quick-add-row" style="display:flex; gap:8px; align-items:center; margin-bottom:10px">
           <input type="number" min="1" placeholder="章數，例如 27" style="max-width:90px" data-quickcount="${i}">
-          <button class="btn secondary" data-quickgen="${i}" style="padding:4px 10px">一次產生「第N章」（之後可自行改名）</button>
+          <button class="btn secondary" data-quickgen="${i}" style="padding:4px 10px">產生章節</button>
           <button class="btn secondary" data-addchapter="${i}" style="padding:4px 10px">+ 單獨新增</button>
         </div>
         <div class="chapter-rows">
@@ -686,7 +811,7 @@ function renderDaily(){
     `;
   } else {
     card.innerHTML = `<h3>今日建議進度</h3><div id="taskRows"></div>
-      <button class="btn" id="saveTodayBtn" style="margin-top:10px">儲存今日完成量</button>
+      <button class="btn" id="saveTodayBtn" style="margin-top:10px">儲存完成量</button>
       <span id="todaySaved" class="muted" style="margin-left:10px"></span>`;
     const rows = document.getElementById('taskRows');
     buildProgressRows(rows, today);
@@ -851,11 +976,11 @@ function renderHistoryLog(){
 // ---------- Notes panel ----------
 function refreshAllSelects(){
   const opts = STATE.config.subjects.map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
-  ['noteSubjectSelect','consolidateSubjectSelect'].forEach(id=>{
+  ['noteSubjectSelect','consolidateSubjectSelect','examSourceSubjectSelect'].forEach(id=>{
     const el = document.getElementById(id);
     const cur = el.value;
     el.innerHTML = opts || '<option value="">請先新增科目</option>';
-    if(cur) el.value = cur;
+    if(cur && STATE.config.subjects.some(s=>s.id===cur)) el.value = cur;
   });
   refreshNoteChapterSelect();
   const checkWrap = document.getElementById('mockSubjectChecks');
@@ -876,8 +1001,8 @@ document.getElementById('noteSubjectSelect').addEventListener('change', refreshN
 // ---------- OCR helpers (for scanned PDFs / photographed notes) ----------
 async function ocrImageViaAI(base64, mediaType){
   const data = await relayRequest('/study', {
-    prompt: '請將這張筆記圖片中的文字內容忠實轉錄成純文字，保留條列與段落結構，不要摘要、不要加入自己的解讀或補充。若為手寫字跡且有辨識不清的部分，請標記【無法辨識】。只輸出轉錄後的文字內容。',
-    maxTokens: 1000,
+    prompt: '請將這張筆記或考古資料圖片中所有可辨識文字忠實轉錄成純文字，包含圖片、表格、圖表與手寫標註中的文字。保留標題、條列與段落結構，不要摘要、不要加入自己的解讀或補充。若有無法辨識的字，請標記【無法辨識】。只輸出轉錄後的文字內容。',
+    maxTokens: 1400,
     image: {data:base64, mediaType:mediaType}
   });
   if(!data || typeof data.text !== 'string') throw new Error('AI 未傳回可用的辨識文字');
@@ -891,22 +1016,62 @@ function fileToBase64(file){
     r.readAsDataURL(file);
   });
 }
+async function ocrPdfPage(page){
+  const viewport = page.getViewport({scale:1.5});
+  const canvas = document.createElement('canvas');
+  canvas.width = viewport.width; canvas.height = viewport.height;
+  await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+  const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+  return ocrImageViaAI(base64, 'image/jpeg');
+}
+function pdfPageContainsImage(operatorList){
+  const ops = pdfjsLib.OPS || {};
+  const imageOps = [
+    ops.paintImageXObject, ops.paintImageXObjectRepeat, ops.paintJpegXObject,
+    ops.paintSolidColorImageMask, ops.paintImageMaskXObject
+  ].filter(value=>typeof value==='number');
+  return imageOps.some(op=>operatorList.fnArray.includes(op));
+}
 async function ocrPdfViaVision(pdf, onProgress){
   let text = '';
-  const maxPages = Math.min(pdf.numPages, 15);
-  for(let p=1;p<=maxPages;p++){
-    onProgress(p, maxPages);
-    const page = await pdf.getPage(p);
-    const viewport = page.getViewport({scale:1.5});
-    const canvas = document.createElement('canvas');
-    canvas.width = viewport.width; canvas.height = viewport.height;
-    await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
-    const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-    const pageText = await ocrImageViaAI(base64, 'image/jpeg');
-    text += `\n【第${p}頁】\n${pageText}\n`;
+  for(let pageNumber=1; pageNumber<=pdf.numPages; pageNumber++){
+    if(onProgress) onProgress(pageNumber, pdf.numPages);
+    const page = await pdf.getPage(pageNumber);
+    const pageText = await ocrPdfPage(page);
+    text += `\n【第${pageNumber}頁 · AI 視覺辨識】\n${pageText}\n`;
   }
-  if(pdf.numPages > maxPages) text += `\n（僅辨識前 ${maxPages} 頁，剩餘頁數請拆開分批上傳）`;
   return text;
+}
+
+// 共用 PDF 讀取程序：逐頁檢查文字層與內嵌圖片，混合型 PDF 也不會漏掉圖片頁的文字。
+async function extractPdfText(file, onProgress){
+  const buffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({
+    data: buffer,
+    cMapUrl: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/",
+    cMapPacked: true
+  }).promise;
+  let extractedText = '';
+  for(let pageNumber=1; pageNumber<=pdf.numPages; pageNumber++){
+    if(onProgress) onProgress(pageNumber, pdf.numPages, false);
+    const page = await pdf.getPage(pageNumber);
+    const content = await page.getTextContent();
+    const nativeText = content.items.map(item=>item.str).join(' ').trim();
+    const meaningfulChars = nativeText.replace(/\s/g,'').length;
+    let containsImage = false;
+    try{ containsImage = pdfPageContainsImage(await page.getOperatorList()); }catch(e){}
+    // 圖片頁即使同時有少量文字層，也要以整頁視覺辨識補齊圖片內的文字與手寫註記。
+    if(meaningfulChars<20 || containsImage){
+      if(onProgress) onProgress(pageNumber, pdf.numPages, true);
+      const visionText = await ocrPdfPage(page);
+      extractedText += `\n【第${pageNumber}頁${containsImage ? ' · 文字／圖片混合辨識' : ' · AI 視覺辨識'}】\n`;
+      if(nativeText) extractedText += `【可擷取文字】\n${nativeText}\n`;
+      extractedText += `【視覺辨識文字】\n${visionText}\n`;
+    }else{
+      extractedText += `\n【第${pageNumber}頁】\n${nativeText}\n`;
+    }
+  }
+  return extractedText;
 }
 
 document.getElementById('pdfInput').addEventListener('change', async (e)=>{
@@ -920,26 +1085,11 @@ document.getElementById('pdfInput').addEventListener('change', async (e)=>{
     try{
       let text = '';
       if(file.type === 'application/pdf'){
-        const buf = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({
-          data: buf,
-          cMapUrl: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/",
-          cMapPacked: true
-        }).promise;
-        let rawText = '';
-        for(let p=1;p<=pdf.numPages;p++){
-          const page = await pdf.getPage(p);
-          const content = await page.getTextContent();
-          rawText += content.items.map(it=>it.str).join(' ') + '\n';
-        }
-        const meaningfulChars = rawText.replace(/\s/g,'').length;
-        if(meaningfulChars / Math.max(pdf.numPages,1) < 20){
-          // looks like a scanned PDF with little/no text layer -> fall back to AI image OCR
-          statusEl.textContent = `偵測到「${file.name}」像是掃描檔，改用 AI 影像辨識中...`;
-          text = await ocrPdfViaVision(pdf, (p,total)=>{ statusEl.textContent = `AI 辨識「${file.name}」第 ${p}/${total} 頁...`; });
-        } else {
-          text = rawText;
-        }
+        text = await extractPdfText(file, (page,total,usingOcr)=>{
+          statusEl.textContent = usingOcr
+            ? `AI 辨識「${file.name}」第 ${page}/${total} 頁的圖片／掃描內容...`
+            : `讀取「${file.name}」第 ${page}/${total} 頁...`;
+        });
       } else if(file.type.startsWith('image/')){
         statusEl.textContent = `AI 辨識圖片「${file.name}」中...`;
         const base64 = await fileToBase64(file);
@@ -1045,43 +1195,242 @@ document.getElementById('saveConsolidateBtn').addEventListener('click', async ()
   document.getElementById('consolidateStatus').textContent = '已儲存 ✓';
 });
 
-// ---------- Mock exam ----------
+// ---------- 考古資料、考情指引與模擬考 ----------
 let currentMockQuestions = [];
+let currentMockSession = null;
+let mockTimerHandle = null;
+let mockGrading = false;
+
+const EXAM_SOURCE_META = {
+  guidance: { label:'考情指引', className:'guidance' },
+  paper: { label:'歷屆試題／回憶題', className:'paper' },
+  teacher: { label:'老師提供題目', className:'teacher' }
+};
+
+function sourceMeta(type){ return EXAM_SOURCE_META[type] || EXAM_SOURCE_META.guidance; }
+function getExamSources(subjectIds){
+  return STATE.examSources.filter(source=>subjectIds.includes(source.subjectId));
+}
+
+// 顯示所有考古資料；老師的文字提醒會有獨立「考情指引」標示，避免被誤認為試題。
+function renderExamSources(){
+  const wrap = document.getElementById('examSourceList');
+  if(STATE.examSources.length===0){
+    wrap.innerHTML = '<div class="exam-source-empty">尚未加入考古資料或考情指引。</div>';
+    return;
+  }
+  wrap.innerHTML = STATE.examSources.slice().reverse().map(source=>{
+    const meta = sourceMeta(source.type);
+    const subject = STATE.config.subjects.find(s=>s.id===source.subjectId);
+    const preview = String(source.content||'').slice(0,220) + (String(source.content||'').length>220 ? '…' : '');
+    return `<div class="exam-source-item ${meta.className}">
+      <div class="exam-source-copy">
+        <div><span class="source-badge ${meta.className}">${meta.label}</span><span class="exam-source-title">${escapeHtml(source.title||meta.label)}</span></div>
+        <div class="exam-source-meta">${escapeHtml(subject ? subject.name : '未指定科目')} · ${escapeHtml(source.createdAt||'')}</div>
+        <div class="exam-source-preview">${escapeHtml(preview)}</div>
+      </div>
+      <button class="btn danger" style="padding:4px 10px" data-del-exam-source="${source.id}">刪除</button>
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('[data-del-exam-source]').forEach(button=>{
+    button.addEventListener('click', async ()=>{
+      const source = STATE.examSources.find(item=>item.id===button.dataset.delExamSource);
+      if(!source || !confirm(`確定刪除「${source.title||sourceMeta(source.type).label}」嗎？`)) return;
+      STATE.examSources = STATE.examSources.filter(item=>item.id!==source.id);
+      await saveState();
+      renderExamSources();
+    });
+  });
+}
+
+document.getElementById('saveExamSourceBtn').addEventListener('click', async ()=>{
+  const subjectId = document.getElementById('examSourceSubjectSelect').value;
+  const type = document.getElementById('examSourceType').value;
+  const title = document.getElementById('examSourceTitle').value.trim();
+  const content = document.getElementById('examSourceContent').value.trim();
+  const status = document.getElementById('examSourceSaved');
+  if(!subjectId){ status.textContent = '請先選擇科目。'; return; }
+  if(!content){ status.textContent = '請輸入文字內容。'; return; }
+  if(content.length>12000){ status.textContent = '內容請控制在 12,000 字以內。'; return; }
+  STATE.examSources.push({
+    id: uid(), subjectId, type: EXAM_SOURCE_META[type] ? type : 'guidance',
+    title: title || sourceMeta(type).label, content, createdAt: todayStr()
+  });
+  await saveState();
+  document.getElementById('examSourceTitle').value = '';
+  document.getElementById('examSourceContent').value = '';
+  status.textContent = type==='guidance' ? '考情指引已加入；它會作為出題方向，不會被當成題目。' : '考古資料已加入。';
+  renderExamSources();
+});
+
+// PDF 匯入只保存可用文字，不保存原檔；因此仍符合這個靜態網站的本機儲存模式。
+document.getElementById('examSourcePdfInput').addEventListener('change', async event=>{
+  const subjectId = document.getElementById('examSourceSubjectSelect').value;
+  const type = document.getElementById('examSourceType').value;
+  const titleInput = document.getElementById('examSourceTitle');
+  const status = document.getElementById('examSourceImportStatus');
+  const files = Array.from(event.target.files||[]);
+  if(!subjectId){ status.textContent = '請先選擇科目，再匯入 PDF。'; event.target.value=''; return; }
+  if(files.length===0) return;
+  let added = 0;
+  const failures = [];
+  for(let index=0; index<files.length; index++){
+    const file = files[index];
+    if(file.type!=='application/pdf' && !/\.pdf$/i.test(file.name)){
+      failures.push(`${file.name} 不是 PDF`);
+      continue;
+    }
+    try{
+      status.textContent = `正在擷取「${file.name}」的文字...`;
+      const text = await extractPdfText(file, (page,total,usingOcr)=>{
+        status.textContent = usingOcr
+          ? `掃描辨識「${file.name}」第 ${page}/${total} 頁...`
+          : `讀取「${file.name}」第 ${page}/${total} 頁...`;
+      });
+      const cleanText = String(text||'').trim();
+      if(cleanText.replace(/\s/g,'').length<20) throw new Error('未擷取到足夠文字；請確認 PDF 不是加密檔或影像過於模糊。');
+      const filenameTitle = file.name.replace(/\.pdf$/i,'');
+      const title = titleInput.value.trim()
+        ? (files.length===1 ? titleInput.value.trim() : `${titleInput.value.trim()} · ${filenameTitle}`)
+        : filenameTitle;
+      const cappedText = cleanText.slice(0,120000);
+      STATE.examSources.push({
+        id:uid(), subjectId, type:EXAM_SOURCE_META[type] ? type : 'paper', title,
+        content:cappedText, createdAt:todayStr(), importedFrom:file.name
+      });
+      added++;
+      if(cleanText.length>cappedText.length) failures.push(`${file.name} 超過儲存上限，僅保留前 120,000 字`);
+    }catch(error){
+      console.error(error);
+      failures.push(`${file.name}：${error.message||'讀取失敗'}`);
+    }
+  }
+  if(added){
+    await saveState();
+    renderExamSources();
+    titleInput.value = '';
+  }
+  status.textContent = added
+    ? `已匯入 ${added} 份 PDF。${failures.length ? ' 另外：'+failures.join('；') : ''}`
+    : `匯入失敗：${failures.join('；')||'未讀取到檔案。'}`;
+  event.target.value = '';
+});
+
+function updateMockModeNote(){
+  const isExam = document.getElementById('mockMode').value==='exam';
+  const duration = Math.max(1, Math.min(300, Number(document.getElementById('mockDuration').value)||30));
+  document.getElementById('mockDuration').disabled = !isExam;
+  document.getElementById('mockModeNote').textContent = isExam
+    ? `考試模式會在題目顯示後開始 ${duration} 分鐘倒數；時間到會自動交卷，再統一評分。`
+    : '練習模式不計時；完成後可直接請 AI 評分與檢討。';
+}
+document.getElementById('mockMode').addEventListener('change', updateMockModeNote);
+document.getElementById('mockDuration').addEventListener('input', updateMockModeNote);
+
 function renderMock(){
+  renderExamSources();
+  updateMockModeNote();
   const wrap = document.getElementById('mockHistory');
   if(STATE.mockHistory.length===0){ wrap.innerHTML = '<div class="empty">尚無模擬考紀錄。</div>'; return; }
-  wrap.innerHTML = '<table><tr><th>日期</th><th>科目</th><th>平均分數</th></tr>' +
+  wrap.innerHTML = '<table><tr><th>日期</th><th>模式</th><th>科目</th><th>平均分數</th></tr>' +
     STATE.mockHistory.slice().reverse().map(m=>{
-      const names = m.subjectIds.map(id=>{const s=STATE.config.subjects.find(x=>x.id===id); return s?s.name:'';}).join('、');
-      return `<tr><td>${m.date}</td><td>${escapeHtml(names)}</td><td>${m.score}</td></tr>`;
+      const names = (m.subjectIds||[]).map(id=>{const s=STATE.config.subjects.find(x=>x.id===id); return s?s.name:'';}).filter(Boolean).join('、');
+      const mode = m.mode==='exam' ? '考試模式' : '練習模式';
+      return `<tr><td>${escapeHtml(m.date||'')}</td><td>${mode}</td><td>${escapeHtml(names)}</td><td>${escapeHtml(String(m.score??''))}</td></tr>`;
     }).join('') + '</table>';
+}
+
+function formatClock(totalSeconds){
+  const minutes = Math.floor(totalSeconds/60);
+  const seconds = totalSeconds%60;
+  return `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+}
+function stopMockTimer(keepVisible=false){
+  if(mockTimerHandle){ clearInterval(mockTimerHandle); mockTimerHandle=null; }
+  const timer = document.getElementById('mockTimer');
+  if(!keepVisible) timer.hidden = true;
+  timer.classList.remove('warning');
+}
+function updateMockTimer(){
+  if(!currentMockSession || currentMockSession.mode!=='exam') return;
+  const timer = document.getElementById('mockTimer');
+  const remaining = Math.max(0, Math.ceil((currentMockSession.deadlineAt-Date.now())/1000));
+  timer.hidden = false;
+  timer.textContent = `剩餘 ${formatClock(remaining)}`;
+  timer.classList.toggle('warning', remaining<=300 && remaining>0);
+  if(remaining===0){
+    stopMockTimer(true);
+    timer.textContent = '時間到，自動交卷';
+    gradeCurrentMock(true);
+  }
+}
+function startMockTimer(){
+  if(!currentMockSession || currentMockSession.mode!=='exam') return;
+  currentMockSession.startedAt = Date.now();
+  currentMockSession.deadlineAt = currentMockSession.startedAt + currentMockSession.durationMin*60*1000;
+  updateMockTimer();
+  mockTimerHandle = setInterval(updateMockTimer, 1000);
 }
 
 document.getElementById('genMockBtn').addEventListener('click', async ()=>{
   const checks = Array.from(document.querySelectorAll('#mockSubjectChecks input:checked')).map(c=>c.value);
   if(checks.length===0){ alert('請至少選擇一個科目'); return; }
-  const count = Number(document.getElementById('mockCount').value)||5;
+  const count = Math.max(1, Math.min(30, Number(document.getElementById('mockCount').value)||5));
+  const mode = document.getElementById('mockMode').value==='exam' ? 'exam' : 'practice';
+  const durationMin = Math.max(1, Math.min(300, Number(document.getElementById('mockDuration').value)||30));
+  const useGuidance = document.getElementById('mockUseGuidance').checked;
   document.getElementById('mockStatus').textContent = '正在準備出題材料...';
-  let context = '';
+  let studyContext = '';
   for(const sid of checks){
     const s = STATE.config.subjects.find(x=>x.id===sid);
+    if(!s) continue;
     if(STATE.consolidated[sid]){
-      context += `\n\n【${s.name} 統整筆記】\n${STATE.consolidated[sid]}`;
+      studyContext += `\n\n【${s.name} 統整筆記】\n${STATE.consolidated[sid]}`;
     } else {
       const notes = STATE.notesList.filter(n=>n.subjectId===sid);
       for(const n of notes.slice(0,2)){
-        try{ const r = await window.storage.get('note-text:'+n.id); context += `\n\n【${s.name} - ${n.filename}】\n${(r?r.value:'').slice(0,3000)}`; }catch(e){}
+        try{ const r = await window.storage.get('note-text:'+n.id); studyContext += `\n\n【${s.name} - ${n.filename}】\n${(r?r.value:'').slice(0,3000)}`; }catch(e){}
       }
     }
   }
-  context = context.slice(0, 10000);
-  const prompt = `你是備考出題老師。根據以下複習資料，出 ${count} 題考試等級的申論／概念題（不要選擇題），涵蓋核心概念、批判思考與應用。\n\n資料：\n${context}\n\n請只輸出 JSON 陣列，格式為 [{"q":"題目內容"}, ...]，不要有其他文字或 markdown 標記。`;
+  const sources = getExamSources(checks);
+  const guidanceSources = useGuidance ? sources.filter(source=>source.type==='guidance') : [];
+  const questionSources = sources.filter(source=>source.type==='paper' || source.type==='teacher');
+  const guidanceContext = guidanceSources.map(source=>`【${sourceMeta(source.type).label}：${source.title}】\n${source.content}`).join('\n\n').slice(0,6000);
+  const questionContext = questionSources.map(source=>`【${sourceMeta(source.type).label}：${source.title}】\n${source.content}`).join('\n\n').slice(0,6000);
+  studyContext = studyContext.slice(0,9000);
+  if(!studyContext && !guidanceContext && !questionContext){
+    document.getElementById('mockStatus').textContent = '尚無可用的筆記、考古題或考情指引；請先加入至少一項資料。';
+    return;
+  }
+  const modeInstruction = mode==='exam'
+    ? '這是正式考試模式：題幹要完整、自足，不要提供提示、答案或解題步驟。'
+    : '這是練習模式：題幹仍須完整，但可涵蓋循序漸進的概念與應用。';
+  const prompt = `你是備考出題老師。請根據以下材料，出 ${count} 題考試等級的申論／概念題（不要選擇題），涵蓋核心概念、批判思考與應用。${modeInstruction}
+
+【複習資料】
+${studyContext || '（未提供）'}
+
+【考情指引：這些不是題目，也不是答案；只能用來調整出題範圍與比重，不可把指引原句改寫成題目】
+${guidanceContext || '（未提供或此次未選用）'}
+
+【歷屆／老師題目參考：只用於掌握範圍與題型，不要大段照抄原題】
+${questionContext || '（未提供）'}
+
+請只輸出 JSON 陣列，格式為 [{"q":"題目內容"}, ...]，不要有其他文字或 markdown 標記。`;
   try{
-    const result = await callAI(prompt, 1000);
+    const result = await callAI(prompt, 1400);
     const parsed = JSON.parse(stripJsonFence(result));
-    currentMockQuestions = parsed.map(p=>({id:uid(), q:p.q, answer:'', subjectIds:checks}));
+    if(!Array.isArray(parsed)) throw new Error('AI 回傳的題目格式不正確。');
+    currentMockQuestions = parsed.filter(item=>item && String(item.q||'').trim()).slice(0,count)
+      .map(item=>({id:uid(), q:String(item.q).trim(), answer:'', subjectIds:checks}));
+    if(currentMockQuestions.length===0) throw new Error('AI 沒有產生可用題目。');
+    currentMockSession = {
+      mode, durationMin, subjectIds:checks, sourceIds:sources.map(source=>source.id),
+      gradingContext: (`【複習資料】\n${studyContext}\n\n【考情指引】\n${guidanceContext}\n\n【題目參考】\n${questionContext}`).slice(0,15000)
+    };
     renderMockQuestions();
-    document.getElementById('mockStatus').textContent = '出題完成 ✓';
+    document.getElementById('mockStatus').textContent = mode==='exam' ? '題目已就緒，倒數已開始。' : '出題完成 ✓';
   }catch(e){
     console.error(e);
     document.getElementById('mockStatus').textContent = '出題失敗：' + (e.message||'請稍後再試。');
@@ -1089,9 +1438,17 @@ document.getElementById('genMockBtn').addEventListener('click', async ()=>{
 });
 
 function renderMockQuestions(){
+  stopMockTimer();
+  mockGrading = false;
   const card = document.getElementById('mockQuestionsCard');
   const wrap = document.getElementById('mockQuestions');
+  const isExam = currentMockSession && currentMockSession.mode==='exam';
   card.style.display = 'block';
+  document.getElementById('mockSessionMeta').textContent = isExam
+    ? `正式考試模式 · ${currentMockQuestions.length} 題 · ${currentMockSession.durationMin} 分鐘`
+    : `練習模式 · ${currentMockQuestions.length} 題 · 不限時`;
+  document.getElementById('mockSubmitHint').textContent = isExam ? '交卷後才會顯示評分與回饋。' : '完成作答後再統一評分。';
+  document.getElementById('gradeMockBtn').disabled = false;
   wrap.innerHTML = currentMockQuestions.map((q,i)=>`
     <div class="q-block" data-qid="${q.id}">
       <div><strong>Q${i+1}.</strong> ${escapeHtml(q.q)}</div>
@@ -1099,37 +1456,71 @@ function renderMockQuestions(){
     </div>
   `).join('');
   document.getElementById('gradeStatus').textContent = '';
+  if(isExam) startMockTimer();
 }
 
-document.getElementById('gradeMockBtn').addEventListener('click', async ()=>{
-  document.querySelectorAll('[data-answer]').forEach(t=>{
-    const q = currentMockQuestions.find(x=>x.id===t.dataset.answer);
-    if(q) q.answer = t.value;
+function collectMockAnswers(){
+  document.querySelectorAll('[data-answer]').forEach(textarea=>{
+    const question = currentMockQuestions.find(item=>item.id===textarea.dataset.answer);
+    if(question) question.answer = textarea.value;
   });
+}
+
+async function gradeCurrentMock(autoSubmitted=false){
+  if(mockGrading || currentMockQuestions.length===0) return;
+  mockGrading = true;
+  collectMockAnswers();
+  stopMockTimer(true);
+  const isExam = currentMockSession && currentMockSession.mode==='exam';
+  const timer = document.getElementById('mockTimer');
+  if(isExam){
+    timer.hidden = false;
+    timer.textContent = autoSubmitted ? '時間到，已交卷' : '已交卷';
+    timer.classList.remove('warning');
+  }
+  const gradeButton = document.getElementById('gradeMockBtn');
+  gradeButton.disabled = true;
   document.getElementById('gradeStatus').textContent = 'AI 評分中...';
   const qaText = currentMockQuestions.map((q,i)=>`Q${i+1}: ${q.q}\n作答: ${q.answer||'（未作答）'}`).join('\n\n');
-  const prompt = `你是備考評分老師。請針對以下題目與作答評分，每題給 0-10 分並附一句簡短回饋（繁體中文）。\n\n${qaText}\n\n只輸出 JSON：{"items":[{"score":數字,"feedback":"一句話回饋"},...],"overall":數字,"summary":"一句總評"}，不要其他文字。`;
+  const prompt = `你是備考評分老師。請以題意及下列參考資料批改作答。考情指引只代表常考方向，不可把它當成題目或唯一標準答案。每題給 0-10 分並附一句具體回饋（繁體中文）。
+
+【參考資料】
+${(currentMockSession?.gradingContext||'（未提供）').slice(0,12000)}
+
+【題目與作答】
+${qaText}
+
+只輸出 JSON：{"items":[{"score":數字,"feedback":"一句話回饋"},...],"overall":數字,"summary":"一句總評"}，不要其他文字。`;
   try{
-    const result = await callAI(prompt, 1000);
+    const result = await callAI(prompt, 1400);
     const parsed = JSON.parse(stripJsonFence(result));
-    parsed.items.forEach((it,i)=>{
-      const block = document.querySelectorAll('.q-block')[i];
+    if(!Array.isArray(parsed.items)) throw new Error('AI 回傳的評分格式不正確。');
+    parsed.items.forEach((item,index)=>{
+      const block = document.querySelectorAll('.q-block')[index];
       if(block){
         const scoreEl = document.createElement('div');
-        scoreEl.innerHTML = `<span class="score">${it.score}/10</span><div class="muted">${escapeHtml(it.feedback)}</div>`;
+        const score = Number.isFinite(Number(item.score)) ? item.score : '—';
+        scoreEl.innerHTML = `<span class="score">${escapeHtml(String(score))}/10</span><div class="muted">${escapeHtml(item.feedback||'')}</div>`;
         block.appendChild(scoreEl);
       }
     });
-    document.getElementById('gradeStatus').textContent = `總評：${parsed.summary}（總分 ${parsed.overall}/10）`;
-    const checks = currentMockQuestions[0]?.subjectIds || [];
-    STATE.mockHistory.push({id:uid(), date:todayStr(), subjectIds:checks, score:parsed.overall, feedback:parsed.summary});
+    document.getElementById('gradeStatus').textContent = `總評：${parsed.summary||''}（總分 ${parsed.overall??'—'}/10）`;
+    STATE.mockHistory.push({
+      id:uid(), date:todayStr(), subjectIds:currentMockSession?.subjectIds || [], score:parsed.overall,
+      feedback:parsed.summary||'', mode:currentMockSession?.mode || 'practice', durationMin:currentMockSession?.durationMin || null,
+      sourceIds:currentMockSession?.sourceIds || []
+    });
     await saveState();
     renderMock();
   }catch(e){
     console.error(e);
     document.getElementById('gradeStatus').textContent = '評分失敗：' + (e.message||'請稍後再試。');
+    gradeButton.disabled = false;
+  }finally{
+    mockGrading = false;
   }
-});
+}
+document.getElementById('gradeMockBtn').addEventListener('click', ()=>gradeCurrentMock(false));
 
 // ---------- Init ----------
 document.getElementById('saveRelayBtn').addEventListener('click', async ()=>{
