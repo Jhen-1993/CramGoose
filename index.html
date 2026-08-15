@@ -227,6 +227,7 @@
     <button data-tab="setup" class="active">設定</button>
     <button data-tab="daily">每日進度</button>
     <button data-tab="notes">筆記管理</button>
+    <button data-tab="examsources">考古資料</button>
     <button data-tab="consolidate">總複習 · 統整筆記</button>
     <button data-tab="mock">模擬考</button>
   </nav>
@@ -348,11 +349,11 @@
     </div>
   </section>
 
-  <!-- MOCK EXAM -->
-  <section class="panel" id="panel-mock">
+  <!-- EXAM SOURCES -->
+  <section class="panel" id="panel-examsources">
     <div class="card">
       <h3>考古資料與考情指引</h3>
-      <p class="muted">老師提供的「觀念為主、常考範圍、出題提醒」請選擇「考情指引」：它不會被當成題目，而是用來調整模擬考的出題權重。若有實際歷屆試題或回憶題，再選擇題目類型。</p>
+      <p class="muted">老師提供的「觀念為主、常考範圍、出題提醒」請選擇「考情指引」：它不會被當成題目，而是用來調整模擬考的出題權重、以及總複習頁「標重點」的依據。若有實際歷屆試題或回憶題，再選擇題目類型。</p>
       <div class="grid2">
         <div><label>所屬科目</label><select id="examSourceSubjectSelect"></select></div>
         <div><label>資料類型</label><select id="examSourceType">
@@ -368,11 +369,18 @@
       <p class="muted" style="margin-top:4px">PDF 會逐頁擷取文字；掃描頁、圖片頁與混合頁會以 AI 視覺辨識補齊內容。系統只存擷取文字，不會上傳或保存原始 PDF；含影像的頁面需要已設定 AI Relay。</p>
       <button class="btn secondary" id="saveExamSourceBtn" style="margin-top:8px">加入資料庫</button>
       <span id="examSourceSaved" class="muted" style="margin-left:10px"></span>
-      <div id="examSourceList" class="exam-source-list"></div>
     </div>
     <div class="card">
+      <h3>已加入的考古資料</h3>
+      <div id="examSourceList" class="exam-source-list"></div>
+    </div>
+  </section>
+
+  <!-- MOCK EXAM -->
+  <section class="panel" id="panel-mock">
+    <div class="card">
       <h3>產生模擬考</h3>
-      <label>納入科目（依統整筆記、原始筆記與已選考古資料出題）</label>
+      <label>納入科目（依統整筆記、原始筆記與「考古資料」頁已加入的資料出題）</label>
       <div class="checkbox-list" id="mockSubjectChecks"></div>
       <div class="grid2" style="margin-top:8px">
         <div><label>題數</label><input type="number" id="mockCount" value="5" min="1" max="30"></div>
@@ -587,6 +595,7 @@ document.querySelectorAll('nav.tabs button').forEach(btn=>{
     document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab==='daily') renderDaily();
     if(btn.dataset.tab==='notes') renderNotes();
+    if(btn.dataset.tab==='examsources') renderExamSources();
     if(btn.dataset.tab==='consolidate') renderConsolidateSelect();
     if(btn.dataset.tab==='mock') renderMock();
   });
@@ -1490,7 +1499,6 @@ document.getElementById('mockMode').addEventListener('change', updateMockModeNot
 document.getElementById('mockDuration').addEventListener('input', updateMockModeNote);
 
 function renderMock(){
-  renderExamSources();
   updateMockModeNote();
   const wrap = document.getElementById('mockHistory');
   if(STATE.mockHistory.length===0){ wrap.innerHTML = '<div class="empty">尚無模擬考紀錄。</div>'; return; }
