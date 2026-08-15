@@ -277,7 +277,7 @@
         <summary style="cursor:pointer; font-weight:600">第一次設定怎麼做？</summary>
         <ol style="margin:8px 0 0; padding-left:20px">
           <li>到 OpenAI API 或 Anthropic Console 建立自己的 API Key，並確認 API 帳號有額度。</li>
-          <li>將本專案的 <code>studygoose-ai-relay-worker</code> 資料夾部署到自己的 Cloudflare Worker；把 API Key 設為 Secret。</li>
+          <li>將本專案的 <code>cramgoose-ai-relay-worker</code> 資料夾部署到自己的 Cloudflare Worker；把 API Key 設為 Secret。</li>
           <li>將 Cloudflare 產生的 <code>https://...workers.dev</code> 網址與你設定的 Relay 密碼填回此處，按「測試並儲存」。</li>
         </ol>
       </details>
@@ -332,12 +332,18 @@
           <label>選擇科目</label>
           <select id="consolidateSubjectSelect"></select>
         </div>
-        <button class="btn" id="consolidateBtn">AI 統整筆記</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <button class="btn secondary" id="annotateBtn">🔥 依考古資料標重點</button>
+          <button class="btn" id="consolidateBtn">AI 統整筆記</button>
+        </div>
       </div>
       <div id="consolidateStatus" class="loading"></div>
-      <textarea id="consolidateOutput" placeholder="尚未產生統整筆記。上傳該科目的 PDF 筆記後，點擊「AI 統整最終筆記」。"></textarea>
-      <div style="margin-top:8px">
+      <textarea id="consolidateOutput" style="min-height:420px" placeholder="尚未產生統整筆記。上傳該科目的 PDF 筆記後，點擊「AI 統整最終筆記」。"></textarea>
+      <div id="consolidateWordCount" class="muted" style="margin-top:4px"></div>
+      <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap">
         <button class="btn secondary" id="saveConsolidateBtn">儲存編輯</button>
+        <button class="btn secondary" id="exportWordBtn">匯出 Word</button>
+        <button class="btn secondary" id="exportPdfBtn">匯出 PDF</button>
       </div>
     </div>
   </section>
@@ -496,7 +502,7 @@ async function relayRequest(path, payload, suppliedConfig){
 }
 async function testRelayConfig(config){
   const data = await relayRequest('/health', null, config);
-  if(!data || !data.ok) throw new Error('這不是可用的 StudyGoose AI Relay。');
+  if(!data || !data.ok) throw new Error('這不是可用的 CramGoose AI Relay。');
   return data;
 }
 function updateRelayStatus(){
@@ -1159,15 +1165,29 @@ function renderConsolidateSelect(){
   const sel = document.getElementById('consolidateSubjectSelect');
   const subjectId = sel.value;
   document.getElementById('consolidateOutput').value = STATE.consolidated[subjectId] || '';
+  updateWordCount();
 }
 document.getElementById('consolidateSubjectSelect').addEventListener('change', renderConsolidateSelect);
+document.getElementById('consolidateOutput').addEventListener('input', updateWordCount);
+function updateWordCount(){
+  const n = document.getElementById('consolidateOutput').value.length;
+  document.getElementById('consolidateWordCount').textContent = n>0 ? `約 ${n} 字` : '';
+}
 
+// 拆成幾個小節分別請 AI 生成，避免單次回覆長度上限讓內容被截斷，最後合併成一份完整文件。
+const CONSOLIDATE_SECTIONS = [
+  {title:'核心概念', instruction:'條列此科目的核心概念，每項附簡短定義，盡量涵蓋筆記中出現的所有重要概念，不要遺漏。'},
+  {title:'重要公式／模型／方法', instruction:'條列筆記中出現的重要公式、模型、檢定方法或流程（如適用），並簡述使用時機。若此科目沒有公式類內容可以略過此節。'},
+  {title:'常見誤解與考試易錯點', instruction:'條列容易混淆、誤解或考試常考錯的地方，並簡短說明正確觀念。'},
+  {title:'概念關聯與比較', instruction:'用 markdown 表格整理容易混淆或需要比較的概念（例如不同方法、名詞的差異），沒有適合比較的內容就列出概念之間的關聯脈絡。'}
+];
 document.getElementById('consolidateBtn').addEventListener('click', async ()=>{
   const subjectId = document.getElementById('consolidateSubjectSelect').value;
   if(!subjectId){ alert('請先設定科目'); return; }
   const notes = STATE.notesList.filter(n=>n.subjectId===subjectId);
   if(notes.length===0){ document.getElementById('consolidateStatus').textContent = '此科目尚未上傳任何筆記。'; return; }
-  document.getElementById('consolidateStatus').textContent = '正在讀取筆記並請 AI 統整，請稍候...';
+  const statusEl = document.getElementById('consolidateStatus');
+  statusEl.textContent = '正在讀取筆記...';
   let combined = '';
   for(const n of notes){
     try{
@@ -1175,16 +1195,26 @@ document.getElementById('consolidateBtn').addEventListener('click', async ()=>{
       combined += `\n\n【${n.filename}】\n` + (r?r.value:'');
     }catch(e){}
   }
-  combined = combined.slice(0, 12000); // keep prompt manageable
+  combined = combined.slice(0, 16000); // keep prompt manageable
   const subj = STATE.config.subjects.find(s=>s.id===subjectId);
-  const prompt = `你是備考讀書助理。以下是「${subj.name}」科目的原始筆記內容（可能來自多份 PDF，內容或有重複）：\n\n${combined}\n\n請將這些筆記統整為一份精簡、結構化的「最終複習筆記」，使用繁體中文，內容包含：\n1. 核心概念條列（含定義）\n2. 重要公式／模型／方法（如適用）\n3. 常見誤解或考試易錯點\n4. 概念之間的關聯或比較表\n只輸出統整後的筆記內容（可用 markdown 標題與條列），不要有其他說明文字。`;
+  const outputEl = document.getElementById('consolidateOutput');
+  let fullDoc = `# ${subj.name}｜最終複習筆記\n`;
+  outputEl.value = fullDoc;
+  updateWordCount();
   try{
-    const result = await callAI(prompt, 1000);
-    document.getElementById('consolidateOutput').value = result;
-    document.getElementById('consolidateStatus').textContent = '完成 ✓ 可直接編輯後儲存。';
+    for(let i=0;i<CONSOLIDATE_SECTIONS.length;i++){
+      const sec = CONSOLIDATE_SECTIONS[i];
+      statusEl.textContent = `AI 統整中（${i+1}/${CONSOLIDATE_SECTIONS.length}）：${sec.title}...`;
+      const prompt = `你是備考讀書助理。以下是「${subj.name}」科目的原始筆記內容（可能來自多份 PDF，內容或有重複）：\n\n${combined}\n\n請針對「${sec.title}」這個部分統整內容：${sec.instruction}\n使用繁體中文，用 markdown 條列或表格呈現，不要重複輸出小節標題本身，只輸出內容，不要有其他說明文字。若筆記中完全沒有相關內容，請只回覆「（筆記中無相關內容）」。`;
+      const result = await callAI(prompt, 1400);
+      fullDoc += `\n\n## ${sec.title}\n${result.trim()}`;
+      outputEl.value = fullDoc;
+      updateWordCount();
+    }
+    statusEl.textContent = '完成 ✓ 可直接編輯，或用下方按鈕匯出成 Word／PDF。';
   }catch(e){
     console.error(e);
-    document.getElementById('consolidateStatus').textContent = 'AI 統整失敗：' + (e.message||'請稍後再試。');
+    statusEl.textContent = 'AI 統整失敗：' + (e.message||'請稍後再試。') + '（已產生的部分仍保留在下方，可繼續編輯）';
   }
 });
 document.getElementById('saveConsolidateBtn').addEventListener('click', async ()=>{
@@ -1193,6 +1223,138 @@ document.getElementById('saveConsolidateBtn').addEventListener('click', async ()
   STATE.consolidated[subjectId] = document.getElementById('consolidateOutput').value;
   await saveState();
   document.getElementById('consolidateStatus').textContent = '已儲存 ✓';
+});
+
+// ---------- 依考古資料標示重點 ----------
+function splitDocSections(md){
+  return md.split(/\n(?=## )/);
+}
+document.getElementById('annotateBtn').addEventListener('click', async ()=>{
+  const subjectId = document.getElementById('consolidateSubjectSelect').value;
+  if(!subjectId){ alert('請先選擇科目'); return; }
+  const statusEl = document.getElementById('consolidateStatus');
+  const outputEl = document.getElementById('consolidateOutput');
+  const currentDoc = outputEl.value.trim();
+  if(!currentDoc){ statusEl.textContent = '請先產生（或貼上）統整筆記內容，再進行標示。'; return; }
+  const sources = getExamSources([subjectId]);
+  if(sources.length===0){
+    statusEl.textContent = '這個科目還沒有考古資料或考情指引，請先到「模擬考」頁的考古資料區塊加入，再回來標示重點。';
+    return;
+  }
+  const examText = sources.map(s=>`【${sourceMeta(s.type).label}：${s.title}】\n${s.content}`).join('\n\n').slice(0, 8000);
+  const sections = splitDocSections(currentDoc);
+  let newDoc = '';
+  try{
+    for(let i=0;i<sections.length;i++){
+      statusEl.textContent = `AI 標示重點中（${i+1}/${sections.length}）...`;
+      const prompt = `你是備考讀書助理。以下是學生複習筆記中的一段內容：\n\n${sections[i]}\n\n以下是這個科目的考古題、老師題目或考情指引（僅供參考出題重點與範圍，不要照抄內容）：\n\n${examText}\n\n請找出筆記中與這些資料相關的條列項目，在該行結尾加上簡短標記，例如「🔥常考」或「📋指引重點」；沒有相關的部分請完全維持原樣，不要更動文字、不要增刪內容、不要改寫措辭，只在相關處插入標記。只輸出加上標記後的完整段落，不要有其他說明文字。`;
+      const result = await callAI(prompt, 1400);
+      newDoc += (newDoc?'\n':'') + result.trim();
+      outputEl.value = newDoc + (i<sections.length-1 ? '\n'+sections.slice(i+1).join('\n') : '');
+      updateWordCount();
+    }
+    outputEl.value = newDoc;
+    updateWordCount();
+    statusEl.textContent = '標示完成 ✓ 記得按「儲存編輯」保留這個版本。';
+  }catch(e){
+    console.error(e);
+    statusEl.textContent = '標示失敗：' + (e.message||'請稍後再試。');
+  }
+});
+
+// ---------- Markdown -> HTML（供 Word／PDF 匯出使用） ----------
+function inlineMd(s){
+  return escapeHtml(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+function mdToHtml(md){
+  const lines = (md||'').split('\n');
+  let html = '', inUl=false, inOl=false, inTable=false, tableRows=[];
+  function closeLists(){ if(inUl){html+='</ul>'; inUl=false;} if(inOl){html+='</ol>'; inOl=false;} }
+  function flushTable(){
+    if(tableRows.length){
+      html += '<table>' + tableRows.map((row,i)=>
+        '<tr>' + row.map(c=>`<${i===0?'th':'td'}>${c}</${i===0?'th':'td'}>`).join('') + '</tr>'
+      ).join('') + '</table>';
+    }
+    tableRows = []; inTable = false;
+  }
+  for(const raw of lines){
+    const line = raw.trim();
+    if(!line){ closeLists(); if(inTable) flushTable(); continue; }
+    if(/^\|.*\|$/.test(line)){
+      const cells = line.split('|').slice(1,-1).map(c=>c.trim());
+      if(cells.every(c=>/^:?-+:?$/.test(c))) continue;
+      if(!inTable){ closeLists(); inTable = true; }
+      tableRows.push(cells.map(c=>inlineMd(c)));
+      continue;
+    } else if(inTable){ flushTable(); }
+    let m;
+    if((m=line.match(/^### (.*)/))){ closeLists(); html+=`<h3>${inlineMd(m[1])}</h3>`; continue; }
+    if((m=line.match(/^## (.*)/))){ closeLists(); html+=`<h2>${inlineMd(m[1])}</h2>`; continue; }
+    if((m=line.match(/^# (.*)/))){ closeLists(); html+=`<h1>${inlineMd(m[1])}</h1>`; continue; }
+    if((m=line.match(/^[-*] (.*)/))){
+      if(!inUl){ closeLists(); html+='<ul>'; inUl=true; }
+      html+=`<li>${inlineMd(m[1])}</li>`; continue;
+    }
+    if((m=line.match(/^\d+\.\s(.*)/))){
+      if(!inOl){ closeLists(); html+='<ol>'; inOl=true; }
+      html+=`<li>${inlineMd(m[1])}</li>`; continue;
+    }
+    closeLists();
+    html += `<p>${inlineMd(line)}</p>`;
+  }
+  closeLists(); if(inTable) flushTable();
+  return html;
+}
+function exportFilenameBase(){
+  const subjectId = document.getElementById('consolidateSubjectSelect').value;
+  const subj = STATE.config.subjects.find(s=>s.id===subjectId);
+  return (subj?subj.name:'統整筆記').replace(/[\\/:*?"<>|]/g,'');
+}
+document.getElementById('exportWordBtn').addEventListener('click', ()=>{
+  const text = document.getElementById('consolidateOutput').value;
+  if(!text.trim()){ alert('目前沒有內容可以匯出'); return; }
+  const bodyHtml = mdToHtml(text);
+  const doc = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset="utf-8"><title>統整筆記</title>
+<style>
+  body{font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; font-size:14px; line-height:1.8;}
+  h1{font-size:22px; border-bottom:2px solid #333; padding-bottom:6px;}
+  h2{font-size:17px; margin-top:22px; color:#2a4a6b;}
+  h3{font-size:15px; margin-top:14px;}
+  table{border-collapse:collapse; width:100%; margin:10px 0;}
+  td,th{border:1px solid #999; padding:6px 8px; font-size:13px;}
+  th{background:#eee;}
+  li{margin-bottom:4px;}
+</style></head>
+<body>${bodyHtml}</body></html>`;
+  const blob = new Blob(['\ufeff'+doc], {type:'application/msword'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${exportFilenameBase()}-統整筆記.doc`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+});
+document.getElementById('exportPdfBtn').addEventListener('click', ()=>{
+  const text = document.getElementById('consolidateOutput').value;
+  if(!text.trim()){ alert('目前沒有內容可以匯出'); return; }
+  const bodyHtml = mdToHtml(text);
+  const win = window.open('', '_blank');
+  if(!win){ alert('請允許此網站開啟新視窗，才能匯出 PDF（瀏覽器的列印對話框會讓你選擇「另存為 PDF」）'); return; }
+  win.document.write(`<html><head><meta charset="utf-8"><title>${exportFilenameBase()}</title>
+<style>
+  body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif; font-size:13px; line-height:1.85; padding:30px; color:#222;}
+  h1{font-size:21px; border-bottom:2px solid #333; padding-bottom:6px;}
+  h2{font-size:16px; margin-top:22px; color:#2a4a6b;}
+  h3{font-size:14px; margin-top:14px;}
+  table{border-collapse:collapse; width:100%; margin:10px 0;}
+  td,th{border:1px solid #999; padding:6px 8px; font-size:12px;}
+  th{background:#eee;}
+  li{margin-bottom:4px;}
+  @media print{ @page{ margin:2cm; } }
+</style></head><body>${bodyHtml}</body></html>`);
+  win.document.close();
+  win.onload = ()=>{ win.focus(); win.print(); };
 });
 
 // ---------- 考古資料、考情指引與模擬考 ----------
