@@ -1,0 +1,4 @@
+# Copy to .dev.vars only for local testing. Never commit .dev.vars.
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+RELAY_ACCESS_TOKEN=

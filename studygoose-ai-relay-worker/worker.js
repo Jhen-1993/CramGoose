@@ -1,4 +1,4 @@
-// StudyGoose Personal AI Relay
+// CramGoose Personal AI Relay
 // Keep provider API keys only in Cloudflare Worker Secrets, never in GitHub or the browser.
 
 const DEFAULT_ALLOWED_ORIGIN = "https://jhen-1993.github.io";
@@ -184,7 +184,7 @@ export default {
       }
       return jsonResponse(request, env, {
         ok: true,
-        app: "studygoose",
+        app: "cramgoose",
         provider,
         accessTokenRequired: Boolean(env.RELAY_ACCESS_TOKEN)
       });
