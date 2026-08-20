@@ -13,8 +13,12 @@
 <title>溫書鵝 CramGoose</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Math&family=Space+Grotesk:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.11.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<!-- 直接產生 PDF，不開啟列印視窗；使用瀏覽器既有字型可正確輸出繁體中文。 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
   :root{
     --ink:#3E5063;
@@ -142,6 +146,21 @@
   .exam-clock{font-variant-numeric:tabular-nums; font-family:var(--serif); font-size:1.15rem; font-weight:700; color:var(--burgundy); background:var(--burgundy-soft); padding:4px 10px; border-radius:20px;}
   .exam-clock.warning{animation:pulse 1s ease-in-out infinite;}
   @keyframes pulse{50%{opacity:.58;}}
+  .export-summary{margin-top:12px; padding:12px 14px; background:var(--blue-soft); border-left:3px solid var(--blue); border-radius:4px; color:var(--ink); line-height:1.65;}
+  .export-summary strong{color:var(--ink);}
+  .export-summary .muted{display:block; margin-top:3px;}
+  .limit-notice{margin-top:10px; padding:12px 14px; background:var(--amber-soft); border-left:3px solid var(--amber); border-radius:4px; color:var(--ink); line-height:1.65;}
+  .export-render-root{position:fixed; left:-100000px; top:0; width:794px; background:#fff; color:#1f2933; z-index:-1;}
+  .export-render-root .pdf-page{font-family:'Noto Sans Math','Cambria Math','STIX Two Math','Noto Sans TC','Microsoft JhengHei',sans-serif; font-size:14px; line-height:1.85; padding:42px 46px; font-variant-numeric:lining-nums;}
+  .export-render-root h1{font-size:25px; border-bottom:2px solid #2a4a6b; padding-bottom:8px; margin:0 0 22px; break-after:avoid-page;}
+  .export-render-root h2{font-size:19px; color:#2a4a6b; margin:28px 0 10px; break-after:avoid-page;}
+  .export-render-root h3{font-size:16px; margin:18px 0 8px; break-after:avoid-page;}
+  .export-render-root p{margin:0 0 9px;}
+  .export-render-root ul,.export-render-root ol{margin:6px 0 12px; padding-left:25px;}
+  .export-render-root li{margin-bottom:5px;}
+  .export-render-root table{border-collapse:collapse; width:100%; margin:12px 0; font-size:12px;}
+  .export-render-root th,.export-render-root td{border:1px solid #93a4b7; padding:6px 8px; vertical-align:top; text-align:left;}
+  .export-render-root th{background:#e7f0f9;}
   .exam-submit-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
   /* 頁尾以柔和資訊卡收尾，連結同一套學習工具但不干擾主要功能。 */
   footer.site-footer{
@@ -310,12 +329,12 @@
   <!-- NOTES -->
   <section class="panel" id="panel-notes">
     <div class="card">
-      <h3>上傳筆記 PDF</h3>
+      <h3>上傳筆記</h3>
       <div class="grid2">
         <div><label>所屬科目</label><select id="noteSubjectSelect"></select></div>
         <div><label>所屬章節（選填）</label><select id="noteChapterSelect"><option value="">— 不指定章節 —</option></select></div>
       </div>
-      <div style="margin-top:10px"><label>選擇檔案（PDF 或圖片皆可，可多選）</label><input type="file" id="pdfInput" accept="application/pdf,image/*" multiple></div>
+      <div style="margin-top:10px"><label>選擇檔案（PDF、圖片、Word .docx、PowerPoint .pptx、純文字 .txt/.md 皆可，可多選）</label><input type="file" id="pdfInput" accept="application/pdf,image/*,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation,.txt,.md,text/plain" multiple></div>
       <div id="uploadStatus" class="muted" style="margin-top:8px"></div>
       <p class="muted" style="margin-top:4px">PDF 會逐頁處理：純文字頁直接擷取；掃描頁、圖片頁與文字＋圖片混合頁會以 AI 視覺辨識補齊圖片、表格、圖表與手寫註記中的文字。含影像的頁面需要已設定 AI Relay，處理時間與 API 用量會隨頁數增加。</p>
     </div>
@@ -334,17 +353,22 @@
           <select id="consolidateSubjectSelect"></select>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap">
-          <button class="btn secondary" id="annotateBtn">🔥 依考古資料標重點</button>
-          <button class="btn" id="consolidateBtn">AI 統整筆記</button>
+          <button class="btn secondary" id="annotateBtn">🔥 標重點並下載 PDF</button>
+          <button class="btn" id="consolidateBtn">AI 整合並下載 PDF</button>
         </div>
       </div>
       <div id="consolidateStatus" class="loading"></div>
-      <textarea id="consolidateOutput" style="min-height:420px" placeholder="尚未產生統整筆記。上傳該科目的 PDF 筆記後，點擊「AI 統整最終筆記」。"></textarea>
+      <div id="consolidateSummary" class="export-summary" aria-live="polite">
+        <strong>尚未建立整合筆記。</strong>
+        <span class="muted">選擇科目後按「AI 整合並下載 PDF」。內容會在背景保存，不會顯示筆記編輯視窗。</span>
+      </div>
+      <div id="consolidationLimitNotice" class="limit-notice" hidden aria-live="polite"></div>
+      <!-- 保留資料容器供儲存、重點標示與重新下載使用；不顯示可編輯視窗。 -->
+      <textarea id="consolidateOutput" hidden aria-hidden="true"></textarea>
       <div id="consolidateWordCount" class="muted" style="margin-top:4px"></div>
       <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap">
-        <button class="btn secondary" id="saveConsolidateBtn">儲存編輯</button>
-        <button class="btn secondary" id="exportWordBtn">匯出 Word</button>
-        <button class="btn secondary" id="exportPdfBtn">匯出 PDF</button>
+        <button class="btn secondary" id="exportPdfBtn">再次下載 PDF</button>
+        <button class="btn secondary" id="exportWordBtn">下載 Word</button>
       </div>
     </div>
   </section>
@@ -1016,7 +1040,7 @@ document.getElementById('noteSubjectSelect').addEventListener('change', refreshN
 // ---------- OCR helpers (for scanned PDFs / photographed notes) ----------
 async function ocrImageViaAI(base64, mediaType){
   const data = await relayRequest('/study', {
-    prompt: '請將這張筆記或考古資料圖片中所有可辨識文字忠實轉錄成純文字，包含圖片、表格、圖表與手寫標註中的文字。保留標題、條列與段落結構，不要摘要、不要加入自己的解讀或補充。若有無法辨識的字，請標記【無法辨識】。只輸出轉錄後的文字內容。',
+    prompt: '請將這張筆記或考古資料圖片中所有可辨識文字忠實轉錄成純文字，包含圖片、表格、圖表、公式與手寫標註中的文字。保留標題、條列與段落結構。數學公式、希臘字母、上下標、積分、根號、集合、箭頭與其他符號必須原樣保留；無法排版的公式請用清楚的線性 Unicode 表示，絕不可自行計算、改寫或補充。不要摘要、不要加入自己的解讀或補充。若有無法辨識的字或符號，請只在該處標記【無法辨識】。只輸出轉錄後的文字內容。',
     maxTokens: 1400,
     image: {data:base64, mediaType:mediaType}
   });
@@ -1030,6 +1054,46 @@ function fileToBase64(file){
     r.onerror = ()=> reject(new Error('讀取檔案失敗'));
     r.readAsDataURL(file);
   });
+}
+
+// 不完全依賴 MIME type：部分瀏覽器對 .docx、.pptx、.md 或下載後 PDF 回報空字串。
+function getFileKind(file){
+  const name = (file.name||'').toLowerCase();
+  const type = file.type||'';
+  if(type === 'application/pdf' || name.endsWith('.pdf')) return 'pdf';
+  if(type.startsWith('image/')) return 'image';
+  if(name.endsWith('.docx') || type==='application/vnd.openxmlformats-officedocument.wordprocessingml.document') return 'docx';
+  if(name.endsWith('.pptx') || type==='application/vnd.openxmlformats-officedocument.presentationml.presentation') return 'pptx';
+  if(name.endsWith('.txt') || name.endsWith('.md') || type==='text/plain' || type==='text/markdown') return 'text';
+  return null;
+}
+function decodeXmlEntities(text){
+  return text.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&amp;/g,'&');
+}
+async function docxToText(file){
+  if(typeof mammoth === 'undefined') throw new Error('Word 解析元件未載入，請確認網路連線後重新整理。');
+  const result = await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});
+  const text = (result && result.value) ? result.value : '';
+  if(!text.trim()) throw new Error('讀不到 Word 文字內容；若文件主要是圖片，請轉成圖片或 PDF 後上傳。');
+  return text;
+}
+async function pptxToText(file){
+  if(typeof JSZip === 'undefined') throw new Error('PowerPoint 解析元件未載入，請確認網路連線後重新整理。');
+  const zip = await JSZip.loadAsync(await file.arrayBuffer());
+  const slides = Object.keys(zip.files).filter(path=>/^ppt\/slides\/slide\d+\.xml$/.test(path)).sort((a,b)=>{
+    const aNumber = Number(a.match(/slide(\d+)\.xml/)[1]);
+    const bNumber = Number(b.match(/slide(\d+)\.xml/)[1]);
+    return aNumber-bNumber;
+  });
+  if(!slides.length) throw new Error('讀不到投影片內容；舊版 .ppt 請先另存為 .pptx。');
+  let text = '';
+  for(let index=0;index<slides.length;index++){
+    const xml = await zip.files[slides[index]].async('string');
+    const items = [...xml.matchAll(/<a:t>([^<]*)<\/a:t>/g)].map(match=>decodeXmlEntities(match[1]));
+    text += `\n【第${index+1}頁投影片】\n${items.join(' ')}\n`;
+  }
+  if(!text.replace(/【第\d+頁投影片】/g,'').trim()) throw new Error('投影片沒有可讀取的文字；若主要是圖片，請另存成圖片或 PDF 後上傳。');
+  return text;
 }
 async function ocrPdfPage(page){
   const viewport = page.getViewport({scale:1.5});
@@ -1101,16 +1165,26 @@ document.getElementById('pdfInput').addEventListener('change', async (e)=>{
     statusEl.textContent = `處理中：${file.name} ...`;
     try{
       let text = '';
-      if(file.type === 'application/pdf'){
+      const kind = getFileKind(file);
+      if(kind === 'pdf'){
         text = await extractPdfText(file, (page,total,usingOcr)=>{
           statusEl.textContent = usingOcr
             ? `AI 辨識「${file.name}」第 ${page}/${total} 頁的圖片／掃描內容...`
             : `讀取「${file.name}」第 ${page}/${total} 頁...`;
         });
-      } else if(file.type.startsWith('image/')){
+      } else if(kind === 'image'){
         statusEl.textContent = `AI 辨識圖片「${file.name}」中...`;
         const base64 = await fileToBase64(file);
         text = await ocrImageViaAI(base64, file.type);
+      } else if(kind === 'docx'){
+        statusEl.textContent = `讀取 Word 文件「${file.name}」中...`;
+        text = await docxToText(file);
+      } else if(kind === 'pptx'){
+        statusEl.textContent = `讀取 PowerPoint「${file.name}」中...`;
+        text = await pptxToText(file);
+      } else if(kind === 'text'){
+        statusEl.textContent = `讀取文字檔「${file.name}」中...`;
+        text = await file.text();
       } else {
         statusEl.textContent = `不支援的檔案類型：${file.name}`;
         failures.push(`${file.name}：不支援的檔案類型`);
@@ -1167,9 +1241,24 @@ function renderNotes(){
 }
 
 // ---------- AI Relay helper ----------
+function sanitizeForPrompt(text){
+  if(!text) return '';
+  const source = String(text).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g,'');
+  let output = '';
+  for(let i=0;i<source.length;i++){
+    const code = source.charCodeAt(i);
+    if(code>=0xD800 && code<=0xDBFF){
+      const next = source.charCodeAt(i+1);
+      if(next>=0xDC00 && next<=0xDFFF){ output += source[i]+source[i+1]; i++; }
+    } else if(code<0xDC00 || code>0xDFFF){
+      output += source[i];
+    }
+  }
+  return output;
+}
 async function callAI(prompt, maxTokens){
   const data = await relayRequest('/study', {
-    prompt: String(prompt||''),
+    prompt: sanitizeForPrompt(prompt),
     maxTokens: maxTokens || 1000
   });
   if(!data || typeof data.text !== 'string') throw new Error('AI 未傳回可用文字');
@@ -1185,15 +1274,175 @@ function renderConsolidateSelect(){
   const subjectId = sel.value;
   document.getElementById('consolidateOutput').value = STATE.consolidated[subjectId] || '';
   updateWordCount();
+  renderConsolidationLimitNotice(subjectId);
 }
 document.getElementById('consolidateSubjectSelect').addEventListener('change', renderConsolidateSelect);
 document.getElementById('consolidateOutput').addEventListener('input', updateWordCount);
 function updateWordCount(){
-  const n = document.getElementById('consolidateOutput').value.length;
-  document.getElementById('consolidateWordCount').textContent = n>0 ? `約 ${n} 字` : '';
+  const text = document.getElementById('consolidateOutput').value;
+  const n = text.length;
+  document.getElementById('consolidateWordCount').textContent = n>0 ? `已保存約 ${n.toLocaleString()} 字` : '';
+  const summary = document.getElementById('consolidateSummary');
+  if(n>0){
+    summary.innerHTML = `<strong>整合筆記已在背景保存。</strong><span class="muted">約 ${n.toLocaleString()} 字。可再次下載 PDF 或 Word；重新整合會覆寫此科目的舊版本。</span>`;
+  } else {
+    summary.innerHTML = '<strong>尚未建立整合筆記。</strong><span class="muted">選擇科目後按「AI 整合並下載 PDF」。內容會在背景保存，不會顯示筆記編輯視窗。</span>';
+  }
 }
 
-// 拆成幾個小節分別請 AI 生成，避免單次回覆長度上限讓內容被截斷，最後合併成一份完整文件。
+// Relay 的單次 prompt 上限為 24,000 字元；大量筆記先切塊，再以兩階段摘要統整。
+const CONSOLIDATION_LIMITS = Object.freeze({
+  maxSourceChars: 108000,
+  maxTotalSourceChars: 216000,
+  chunkChars: 9000,
+  maxChunks: 12,
+  maxStages: 2,
+  digestChars: 17000
+});
+
+function getConsolidationPlan(notes){
+  const totalChars = notes.reduce((sum,n)=>sum + Math.max(0, Number(n.chars)||0), 0);
+  const includedChars = Math.min(totalChars, CONSOLIDATION_LIMITS.maxTotalSourceChars);
+  const estimatedChunks = Math.max(1, Math.ceil(includedChars/CONSOLIDATION_LIMITS.chunkChars));
+  const estimatedStages = Math.max(1, Math.ceil(estimatedChunks/CONSOLIDATION_LIMITS.maxChunks));
+  return {totalChars, includedChars, estimatedChunks, estimatedStages, exceedsStage:totalChars>CONSOLIDATION_LIMITS.maxSourceChars, exceedsTotal:totalChars>CONSOLIDATION_LIMITS.maxTotalSourceChars};
+}
+
+function renderConsolidationLimitNotice(subjectId){
+  const notice = document.getElementById('consolidationLimitNotice');
+  const notes = STATE.notesList.filter(n=>n.subjectId===subjectId);
+  if(!notes.length){ notice.hidden = true; return; }
+  const plan = getConsolidationPlan(notes);
+  if(!plan.exceedsStage){ notice.hidden = true; return; }
+  notice.hidden = false;
+  if(plan.exceedsTotal){
+    notice.innerHTML = `<strong>資料量上限提醒：</strong>此科目約 ${plan.totalChars.toLocaleString()} 字，超過一次最多 ${CONSOLIDATION_LIMITS.maxTotalSourceChars.toLocaleString()} 字的安全處理量。系統會自動進行 ${CONSOLIDATION_LIMITS.maxStages} 階段整合，但僅納入依上傳順序的前 ${CONSOLIDATION_LIMITS.maxTotalSourceChars.toLocaleString()} 字；其餘內容會在 PDF 中註明未納入。建議分成不同科目、或先分批統整。`;
+  } else {
+    notice.innerHTML = `<strong>大量筆記提醒：</strong>此科目約 ${plan.totalChars.toLocaleString()} 字，系統會自動分成 ${plan.estimatedStages} 個階段處理（每階段最多 ${CONSOLIDATION_LIMITS.maxSourceChars.toLocaleString()} 字），再把中繼摘要統整為一份最終 PDF。所有目前上傳內容都會納入，不需手動拆成兩次。`;
+  }
+}
+
+function splitAtBoundaries(text, limit){
+  const source = String(text||'').trim();
+  if(!source) return [];
+  const chunks = [];
+  let rest = source;
+  while(rest.length>limit){
+    let cut = rest.lastIndexOf('\n\n', limit);
+    if(cut<Math.floor(limit*0.55)) cut = rest.lastIndexOf('\n', limit);
+    if(cut<Math.floor(limit*0.55)) cut = rest.lastIndexOf('。', limit);
+    if(cut<Math.floor(limit*0.55)) cut = limit;
+    chunks.push(rest.slice(0,cut).trim());
+    rest = rest.slice(cut).trim();
+  }
+  if(rest) chunks.push(rest);
+  return chunks;
+}
+
+function takeLeadingText(text, limit){
+  const source = String(text||'').trim();
+  if(source.length<=limit) return {head:source, tail:''};
+  let cut = source.lastIndexOf('\n\n', limit);
+  if(cut<Math.floor(limit*0.55)) cut = source.lastIndexOf('\n', limit);
+  if(cut<Math.floor(limit*0.55)) cut = source.lastIndexOf('。', limit);
+  if(cut<Math.floor(limit*0.55)) cut = limit;
+  return {head:source.slice(0,cut).trim(), tail:source.slice(cut).trim()};
+}
+
+async function collectConsolidationSources(notes, statusEl){
+  const parts = [];
+  let keptChars = 0, omittedFiles = 0, unreadableFiles = 0;
+  for(let i=0;i<notes.length;i++){
+    statusEl.textContent = `正在讀取筆記（${i+1}/${notes.length}）...`;
+    try{
+      const r = await window.storage.get('note-text:'+notes[i].id);
+      const raw = (r && r.value) ? String(r.value).trim() : '';
+      if(!raw){ unreadableFiles++; continue; }
+      const remaining = CONSOLIDATION_LIMITS.maxTotalSourceChars-keptChars;
+      if(remaining<=0){ omittedFiles++; continue; }
+      const kept = raw.slice(0, remaining);
+      if(kept.length<raw.length) omittedFiles++;
+      keptChars += kept.length;
+      parts.push({filename:notes[i].filename, text:kept});
+    }catch(e){ unreadableFiles++; }
+  }
+  return {parts, keptChars, omittedFiles, unreadableFiles};
+}
+
+function makeConsolidationChunks(parts){
+  const chunks = [];
+  let current = '';
+  for(const part of parts){
+    let remaining = String(part.text||'').trim();
+    while(remaining){
+      const label = `【${part.filename}】\n`;
+      const separator = current ? '\n\n' : '';
+      let capacity = CONSOLIDATION_LIMITS.chunkChars-current.length-separator.length-label.length;
+      if(capacity<500 && current){ chunks.push(current); current = ''; continue; }
+      capacity = Math.max(500, capacity);
+      const slice = takeLeadingText(remaining, capacity);
+      current += separator + label + slice.head;
+      remaining = slice.tail;
+      if(current.length>=CONSOLIDATION_LIMITS.chunkChars-250){ chunks.push(current); current = ''; }
+    }
+  }
+  if(current) chunks.push(current);
+  return chunks;
+}
+
+async function reduceStudyDigest(digest, subjectName, statusEl, statusPrefix=''){
+  let merged = digest;
+  let pass = 0;
+  while(merged.length>CONSOLIDATION_LIMITS.digestChars && pass<3){
+    pass++;
+    const blocks = splitAtBoundaries(merged, CONSOLIDATION_LIMITS.chunkChars);
+    const reduced = [];
+    for(let i=0;i<blocks.length;i++){
+      statusEl.textContent = `${statusPrefix}正在壓縮第 ${pass} 輪整理稿（${i+1}/${blocks.length} 批）...`;
+      const prompt = `請將以下「${subjectName}」的整理稿再壓縮，保留所有可考的定義、公式、數學符號、比較、流程與易錯點；公式與符號不可改寫，不得補充外部知識。用繁體中文條列，只輸出內容。\n\n${blocks[i]}`;
+      reduced.push(await callAI(prompt, 900));
+    }
+    merged = reduced.join('\n\n');
+  }
+  if(merged.length>CONSOLIDATION_LIMITS.digestChars) throw new Error('中繼摘要仍超過安全長度，請將該科目再拆成較小的主題後分別統整。');
+  return merged;
+}
+
+async function makeStudyDigest(chunks, subjectName, statusEl, stageLabel=''){
+  const digests = [];
+  for(let i=0;i<chunks.length;i++){
+    statusEl.textContent = `${stageLabel}正在整理原始筆記（${i+1}/${chunks.length} 批）...`;
+    const prompt = `你是備考讀書助理。請把以下「${subjectName}」的原始筆記壓縮成忠實、可供後續統整的重點資料。保留定義、公式、數學符號、比較、流程、易錯點與出處標籤；刪除明顯重複與無意義文字。數學公式、希臘字母、上下標、積分、根號、集合、箭頭與其他符號必須維持原樣，絕不可自行計算、改寫或補充。不可添加筆記中沒有的知識。請用繁體中文條列，只輸出整理後內容。\n\n${chunks[i]}`;
+    digests.push(await callAI(prompt, 900));
+  }
+  return await reduceStudyDigest(digests.join('\n\n'), subjectName, statusEl, stageLabel);
+}
+
+function groupChunksIntoStages(chunks){
+  const stages = [];
+  for(let i=0;i<chunks.length;i+=CONSOLIDATION_LIMITS.maxChunks) stages.push(chunks.slice(i, i+CONSOLIDATION_LIMITS.maxChunks));
+  return stages;
+}
+
+async function makeHierarchicalStudyDigest(stages, subjectName, statusEl){
+  const stageDigests = [];
+  for(let i=0;i<stages.length;i++) stageDigests.push(await makeStudyDigest(stages[i], subjectName, statusEl, `第 ${i+1}/${stages.length} 階段：`));
+  return stageDigests.length===1 ? stageDigests[0] : await reduceStudyDigest(stageDigests.join('\n\n'), subjectName, statusEl, '正在合併中繼摘要：');
+}
+
+async function persistConsolidatedText(subjectId, text){
+  STATE.consolidated[subjectId] = text;
+  await saveState();
+}
+
+function setConsolidationBusy(isBusy){
+  ['consolidateBtn','annotateBtn','exportPdfBtn','exportWordBtn'].forEach(id=>{
+    const button = document.getElementById(id);
+    if(button) button.disabled = isBusy;
+  });
+}
+
+// 拆成幾個小節分別請 AI 生成；前面的批次摘要可避免大量上傳時遺漏後段資料。
 const CONSOLIDATE_SECTIONS = [
   {title:'核心概念', instruction:'條列此科目的核心概念，每項附簡短定義，盡量涵蓋筆記中出現的所有重要概念，不要遺漏。'},
   {title:'重要公式／模型／方法', instruction:'條列筆記中出現的重要公式、模型、檢定方法或流程（如適用），並簡述使用時機。若此科目沒有公式類內容可以略過此節。'},
@@ -1206,42 +1455,46 @@ document.getElementById('consolidateBtn').addEventListener('click', async ()=>{
   const notes = STATE.notesList.filter(n=>n.subjectId===subjectId);
   if(notes.length===0){ document.getElementById('consolidateStatus').textContent = '此科目尚未上傳任何筆記。'; return; }
   const statusEl = document.getElementById('consolidateStatus');
-  statusEl.textContent = '正在讀取筆記...';
-  let combined = '';
-  for(const n of notes){
-    try{
-      const r = await window.storage.get('note-text:'+n.id);
-      combined += `\n\n【${n.filename}】\n` + (r?r.value:'');
-    }catch(e){}
-  }
-  combined = combined.slice(0, 16000); // keep prompt manageable
   const subj = STATE.config.subjects.find(s=>s.id===subjectId);
   const outputEl = document.getElementById('consolidateOutput');
-  let fullDoc = `# ${subj.name}｜最終複習筆記\n`;
-  outputEl.value = fullDoc;
-  updateWordCount();
+  setConsolidationBusy(true);
   try{
+    const source = await collectConsolidationSources(notes, statusEl);
+    if(source.parts.length===0) throw new Error('讀不到可用的筆記文字，請確認上傳是否完成。');
+    const allStages = groupChunksIntoStages(makeConsolidationChunks(source.parts));
+    const skippedStages = Math.max(0, allStages.length-CONSOLIDATION_LIMITS.maxStages);
+    const stages = allStages.slice(0, CONSOLIDATION_LIMITS.maxStages);
+    if(!stages.length) throw new Error('沒有可用的筆記內容可統整。');
+    const studyDigest = await makeHierarchicalStudyDigest(stages, subj.name, statusEl);
+    let fullDoc = `# ${subj.name}｜最終複習筆記\n`;
+    if(source.omittedFiles || source.unreadableFiles || skippedStages || stages.length>1){
+      fullDoc += `\n> 整合範圍提示：本次讀取 ${source.parts.length}/${notes.length} 份筆記、約 ${source.keptChars.toLocaleString()} 字。` +
+        `${stages.length>1 ? `系統已自動分成 ${stages.length} 個階段整理，再合併為本份筆記。` : ''}` +
+        `${source.omittedFiles ? `另有 ${source.omittedFiles} 份超出本次 ${CONSOLIDATION_LIMITS.maxTotalSourceChars.toLocaleString()} 字上限，未完整納入。` : ''}` +
+        `${source.unreadableFiles ? `另有 ${source.unreadableFiles} 份讀取失敗或沒有文字。` : ''}` +
+        `${skippedStages ? `另有 ${skippedStages} 個階段超過本次處理上限，未納入。` : ''}`;
+    }
+    outputEl.value = fullDoc;
+    updateWordCount();
     for(let i=0;i<CONSOLIDATE_SECTIONS.length;i++){
       const sec = CONSOLIDATE_SECTIONS[i];
       statusEl.textContent = `AI 統整中（${i+1}/${CONSOLIDATE_SECTIONS.length}）：${sec.title}...`;
-      const prompt = `你是備考讀書助理。以下是「${subj.name}」科目的原始筆記內容（可能來自多份 PDF，內容或有重複）：\n\n${combined}\n\n請針對「${sec.title}」這個部分統整內容：${sec.instruction}\n使用繁體中文，用 markdown 條列或表格呈現，不要重複輸出小節標題本身，只輸出內容，不要有其他說明文字。若筆記中完全沒有相關內容，請只回覆「（筆記中無相關內容）」。`;
+      const prompt = `你是備考讀書助理。以下是「${subj.name}」科目的整理後原始資料（可能來自多份筆記，內容或有重複）：\n\n${studyDigest}\n\n請針對「${sec.title}」這個部分統整內容：${sec.instruction}\n保留資料中所有重要數學公式與符號，不得自行計算、改寫或補充。使用繁體中文，用 markdown 條列或表格呈現，不要重複輸出小節標題本身，只輸出內容，不要有其他說明文字。若資料中完全沒有相關內容，請只回覆「（筆記中無相關內容）」。`;
       const result = await callAI(prompt, 1400);
       fullDoc += `\n\n## ${sec.title}\n${result.trim()}`;
       outputEl.value = fullDoc;
       updateWordCount();
     }
-    statusEl.textContent = '完成 ✓ 可直接編輯，或用下方按鈕匯出成 Word／PDF。';
+    await persistConsolidatedText(subjectId, fullDoc);
+    statusEl.textContent = '整合完成，正在建立 PDF...';
+    await downloadPdf(fullDoc, `${exportFilenameBase()}-統整筆記.pdf`);
+    statusEl.textContent = `完成 ✓ 已整合 ${source.parts.length}/${notes.length} 份筆記並下載 PDF。`;
   }catch(e){
     console.error(e);
-    statusEl.textContent = 'AI 統整失敗：' + (e.message||'請稍後再試。') + '（已產生的部分仍保留在下方，可繼續編輯）';
+    statusEl.textContent = 'AI 統整或 PDF 建立失敗：' + (e.message||'請稍後再試。') + '。';
+  }finally{
+    setConsolidationBusy(false);
   }
-});
-document.getElementById('saveConsolidateBtn').addEventListener('click', async ()=>{
-  const subjectId = document.getElementById('consolidateSubjectSelect').value;
-  if(!subjectId) return;
-  STATE.consolidated[subjectId] = document.getElementById('consolidateOutput').value;
-  await saveState();
-  document.getElementById('consolidateStatus').textContent = '已儲存 ✓';
 });
 
 // ---------- 依考古資料標示重點 ----------
@@ -1263,6 +1516,7 @@ document.getElementById('annotateBtn').addEventListener('click', async ()=>{
   const examText = sources.map(s=>`【${sourceMeta(s.type).label}：${s.title}】\n${s.content}`).join('\n\n').slice(0, 8000);
   const sections = splitDocSections(currentDoc);
   let newDoc = '';
+  setConsolidationBusy(true);
   try{
     for(let i=0;i<sections.length;i++){
       statusEl.textContent = `AI 標示重點中（${i+1}/${sections.length}）...`;
@@ -1274,10 +1528,15 @@ document.getElementById('annotateBtn').addEventListener('click', async ()=>{
     }
     outputEl.value = newDoc;
     updateWordCount();
-    statusEl.textContent = '標示完成 ✓ 記得按「儲存編輯」保留這個版本。';
+    await persistConsolidatedText(subjectId, newDoc);
+    statusEl.textContent = '重點標示完成，正在建立 PDF...';
+    await downloadPdf(newDoc, `${exportFilenameBase()}-統整筆記-重點版.pdf`);
+    statusEl.textContent = '重點標示完成 ✓ 已下載 PDF。';
   }catch(e){
     console.error(e);
     statusEl.textContent = '標示失敗：' + (e.message||'請稍後再試。');
+  }finally{
+    setConsolidationBusy(false);
   }
 });
 
@@ -1330,11 +1589,54 @@ function exportFilenameBase(){
   const subj = STATE.config.subjects.find(s=>s.id===subjectId);
   return (subj?subj.name:'統整筆記').replace(/[\\/:*?"<>|]/g,'');
 }
+
+function triggerDownload(blob, filename){
+  if(navigator.msSaveOrOpenBlob){ navigator.msSaveOrOpenBlob(blob, filename); return; }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); }, 1500);
+}
+
+function makePdfRenderRoot(text){
+  const root = document.createElement('div');
+  root.className = 'export-render-root';
+  root.setAttribute('aria-hidden','true');
+  root.innerHTML = `<article class="pdf-page">${mdToHtml(text)}</article>`;
+  document.body.appendChild(root);
+  return root;
+}
+
+async function downloadPdf(text, filename){
+  if(!text.trim()) throw new Error('目前沒有內容可以匯出。');
+  if(typeof window.html2pdf !== 'function') throw new Error('PDF 匯出元件未載入，請確認網路連線後重新整理。');
+  const root = makePdfRenderRoot(text);
+  try{
+    // 等待中文字型與數學字型就緒，再擷取畫面，避免 PDF 出現方塊或字型替換。
+    if(document.fonts && document.fonts.ready) await document.fonts.ready;
+    await window.html2pdf().set({
+      margin: [8, 8, 10, 8],
+      filename,
+      image: {type:'jpeg', quality:0.96},
+      html2canvas: {scale:1.5, useCORS:true, backgroundColor:'#ffffff'},
+      jsPDF: {unit:'mm', format:'a4', orientation:'portrait'},
+      pagebreak: {mode:['css','legacy']}
+    }).from(root).save();
+  }finally{
+    root.remove();
+  }
+}
+
 document.getElementById('exportWordBtn').addEventListener('click', ()=>{
   const text = document.getElementById('consolidateOutput').value;
   if(!text.trim()){ alert('目前沒有內容可以匯出'); return; }
-  const bodyHtml = mdToHtml(text);
-  const doc = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+  try{
+    const bodyHtml = mdToHtml(text);
+    const doc = `<!DOCTYPE html><html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
 <head><meta charset="utf-8"><title>統整筆記</title>
 <style>
   body{font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; font-size:14px; line-height:1.8;}
@@ -1347,33 +1649,28 @@ document.getElementById('exportWordBtn').addEventListener('click', ()=>{
   li{margin-bottom:4px;}
 </style></head>
 <body>${bodyHtml}</body></html>`;
-  const blob = new Blob(['\ufeff'+doc], {type:'application/msword'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `${exportFilenameBase()}-統整筆記.doc`;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    triggerDownload(new Blob(['\ufeff'+doc], {type:'application/msword;charset=utf-8'}), `${exportFilenameBase()}-統整筆記.doc`);
+    document.getElementById('consolidateStatus').textContent = '已下載 Word 檔。';
+  }catch(e){
+    console.error(e);
+    document.getElementById('consolidateStatus').textContent = 'Word 匯出失敗：' + (e.message||'請稍後再試。');
+  }
 });
-document.getElementById('exportPdfBtn').addEventListener('click', ()=>{
+document.getElementById('exportPdfBtn').addEventListener('click', async ()=>{
   const text = document.getElementById('consolidateOutput').value;
   if(!text.trim()){ alert('目前沒有內容可以匯出'); return; }
-  const bodyHtml = mdToHtml(text);
-  const win = window.open('', '_blank');
-  if(!win){ alert('請允許此網站開啟新視窗，才能匯出 PDF（瀏覽器的列印對話框會讓你選擇「另存為 PDF」）'); return; }
-  win.document.write(`<html><head><meta charset="utf-8"><title>${exportFilenameBase()}</title>
-<style>
-  body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif; font-size:13px; line-height:1.85; padding:30px; color:#222;}
-  h1{font-size:21px; border-bottom:2px solid #333; padding-bottom:6px;}
-  h2{font-size:16px; margin-top:22px; color:#2a4a6b;}
-  h3{font-size:14px; margin-top:14px;}
-  table{border-collapse:collapse; width:100%; margin:10px 0;}
-  td,th{border:1px solid #999; padding:6px 8px; font-size:12px;}
-  th{background:#eee;}
-  li{margin-bottom:4px;}
-  @media print{ @page{ margin:2cm; } }
-</style></head><body>${bodyHtml}</body></html>`);
-  win.document.close();
-  win.onload = ()=>{ win.focus(); win.print(); };
+  const statusEl = document.getElementById('consolidateStatus');
+  setConsolidationBusy(true);
+  statusEl.textContent = '正在建立 PDF...';
+  try{
+    await downloadPdf(text, `${exportFilenameBase()}-統整筆記.pdf`);
+    statusEl.textContent = '已下載 PDF。';
+  }catch(e){
+    console.error(e);
+    statusEl.textContent = 'PDF 匯出失敗：' + (e.message||'請確認網路連線後重新整理。');
+  }finally{
+    setConsolidationBusy(false);
+  }
 });
 
 // ---------- 考古資料、考情指引與模擬考 ----------
