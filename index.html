@@ -1095,6 +1095,8 @@ document.getElementById('pdfInput').addEventListener('change', async (e)=>{
   if(!subjectId){ document.getElementById('uploadStatus').textContent = '請先選擇科目'; return; }
   const files = Array.from(e.target.files);
   const statusEl = document.getElementById('uploadStatus');
+  let uploadedCount = 0;
+  const failures = [];
   for(const file of files){
     statusEl.textContent = `處理中：${file.name} ...`;
     try{
@@ -1111,24 +1113,32 @@ document.getElementById('pdfInput').addEventListener('change', async (e)=>{
         text = await ocrImageViaAI(base64, file.type);
       } else {
         statusEl.textContent = `不支援的檔案類型：${file.name}`;
+        failures.push(`${file.name}：不支援的檔案類型`);
         continue;
       }
       const id = uid();
       try{
         await safeStorageSet('note-text:'+id, text.slice(0, 400000)); // safety cap
       }catch(storageErr){
-        statusEl.textContent = `儲存失敗：${file.name}（網路或伺服器問題，請稍後重試上傳）`;
+        failures.push(`${file.name}：瀏覽器儲存失敗（${storageErr.message||'請稍後重試'}）`);
         showStorageError();
         continue;
       }
       STATE.notesList.push({id, subjectId, chapterId, filename:file.name, uploadedAt:new Date().toISOString(), chars:text.length});
       await saveState();
+      uploadedCount++;
     }catch(err){
       console.error(err);
-      statusEl.textContent = `讀取失敗：${file.name}（${err.message||'可能為加密檔或格式不支援'}）`;
+      failures.push(`${file.name}：${err.message||'可能為加密檔、格式不支援，或尚未設定 AI Relay'}`);
     }
   }
-  statusEl.textContent = '上傳完成 ✓';
+  if(uploadedCount && failures.length){
+    statusEl.textContent = `已上傳 ${uploadedCount} 份筆記；另有 ${failures.length} 份失敗：${failures.join('；')}`;
+  }else if(uploadedCount){
+    statusEl.textContent = `上傳完成 ✓（共 ${uploadedCount} 份）`;
+  }else{
+    statusEl.textContent = `沒有任何筆記成功上傳：${failures.join('；')||'請重新選擇檔案後再試'}`;
+  }
   renderNotes();
   e.target.value = '';
 });
