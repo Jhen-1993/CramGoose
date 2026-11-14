@@ -4,7 +4,7 @@
 const DEFAULT_ALLOWED_ORIGIN = "https://jhen-1993.github.io";
 const MAX_PROMPT_CHARS = 24000;
 const MAX_IMAGE_BASE64_CHARS = 7 * 1024 * 1024;
-const MAX_OUTPUT_TOKENS = 1600;
+const MAX_OUTPUT_TOKENS = 6000;
 const SUPPORTED_IMAGE_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -47,7 +47,7 @@ function jsonResponse(request, env, body, status = 200) {
 }
 
 function isAuthorized(request, env) {
-  if (!env.RELAY_ACCESS_TOKEN) return true;
+  if (!env.RELAY_ACCESS_TOKEN) return false;
   return request.headers.get("Authorization") === `Bearer ${env.RELAY_ACCESS_TOKEN}`;
 }
 
@@ -129,6 +129,9 @@ async function callOpenAI(env, prompt, maxTokens, image) {
   });
 
   const data = await upstreamJson(response);
+  if (data?.choices?.[0]?.finish_reason === "length") {
+    throw new Error("AI 回覆因長度上限而中斷；請縮小辨識範圍或分批處理，勿將這次回覆視為完整內容。");
+  }
   const text = contentToText(data?.choices?.[0]?.message?.content);
   if (!text) throw new Error("The AI provider returned an empty response.");
   return text;
@@ -160,6 +163,9 @@ async function callAnthropic(env, prompt, maxTokens, image) {
   });
 
   const data = await upstreamJson(response);
+  if (data?.stop_reason === "max_tokens") {
+    throw new Error("AI 回覆因長度上限而中斷；請縮小辨識範圍或分批處理，勿將這次回覆視為完整內容。");
+  }
   const text = (data?.content || [])
     .filter((block) => block?.type === "text")
     .map((block) => block.text || "")
@@ -186,6 +192,7 @@ export default {
         ok: true,
         app: "cramgoose",
         provider,
+        configured: Boolean(env.AI_MODEL && (provider === "anthropic" ? env.ANTHROPIC_API_KEY : env.OPENAI_API_KEY)),
         accessTokenRequired: Boolean(env.RELAY_ACCESS_TOKEN)
       });
     }

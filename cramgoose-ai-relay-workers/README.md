@@ -19,9 +19,9 @@
 
 ## 部署方式
 
-1. 將整個專案上傳 GitHub（`Jhen-1993/CramGoose`）；本資料夾（`cramgoose-ai-relay-worker`）必須保留在 repo 內。
+1. 將整個專案上傳 GitHub（`Jhen-1993/CramGoose`）；本資料夾（`cramgoose-ai-relay-workers`）必須保留在 repo 內。
 2. 在 Cloudflare **Workers & Pages** 建立 Worker，連接這個 GitHub repo。
-3. 將 Root directory 設成 `cramgoose-ai-relay-worker`，Build command 留白，Deploy command 填 `npm run deploy`。
+3. 將 Root directory 設成 `cramgoose-ai-relay-workers`，Build command 留白，Deploy command 填 `npm run deploy`。
 4. 先部署一次，再進入 Worker 的 **Settings → Variables and Secrets**，新增上表中的 Text 變數與 Secret。
 5. 新增或更換 Secret 後，到 **Deployments** 將最新版本 Promote 到 100%。
 6. 到 **Domains** 複製 Production Worker URL，例如 `https://cramgoose-ai-relay.<你的帳號>.workers.dev`。
@@ -41,3 +41,5 @@ npx wrangler dev
 - `RELAY_ACCESS_TOKEN` 是保護你的 Worker 的自訂密碼，不是 OpenAI 或 Anthropic 的 API Key。
 - AI 功能包含筆記統整、標示重點、出題、批改、圖片／掃描 PDF OCR，皆會使用你選擇的 API 帳號計費。
 - ChatGPT Plus 與 Claude Pro／訂閱通常不等於 API 點數；是否可呼叫 API 以各 API 帳號的餘額與權限為準。
+
+新版補充：RELAY_ACCESS_TOKEN 為必填。未設密碼時拒絕請求。OCR 輸出上限 6,000 tokens；偵測到回覆截斷會報錯，不視為完整辨識。本機預覽須將 http://127.0.0.1:8847 加到 ALLOWED_ORIGIN，與原網址以逗號分隔。
