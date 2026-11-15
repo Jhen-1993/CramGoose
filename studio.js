@@ -292,7 +292,7 @@ window.studioReady=window.appReady.then(async()=>{
   document.body.dataset.view='notes';
   document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{
     closeMenu();
-    document.body.dataset.view=b.dataset.tab;$('pageLabel').textContent=b.textContent.trim().slice(1).trim();
+    document.body.dataset.view=b.dataset.tab;$('pageLabel').textContent=b.lastChild.textContent.trim();
     saveCurrentNote();saveConsolidatedDraft();if(b.dataset.tab==='consolidate')renderVersions();
     updateStats();
   }));

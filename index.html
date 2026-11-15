@@ -27,7 +27,7 @@
   <a class="brand" href="#notes"><img src="assets/goose.png" alt=""><span>溫書鵝<small>CRAMGOOSE</small></span></a>
   <button class="menu-toggle" id="menuToggle" aria-label="開啟導覽選單" aria-controls="navMount" aria-expanded="false"><span aria-hidden="true">☰</span><span>選單</span></button>
   <div class="nav-caption">我的學習空間</div><div id="navMount"></div>
-  <div class="sidebar-bottom"><div class="side-goose"><img src="assets/goose.png" alt="戴眼鏡抱著筆記本的溫書鵝"><p>一頁一頁，<br>把知識變成自己的。</p></div><button class="local-status" id="backupShortcut"><span class="status-dot"></span> 本機儲存 · 備份資料 ↗</button></div>
+  <div class="sidebar-bottom"><div class="side-goose"><img src="assets/goose.png" alt="戴眼鏡抱著筆記本的溫書鵝"><p>一頁一頁，<br>把知識變成自己的。</p></div><button class="local-status" id="backupShortcut"><span class="status-dot"></span> 本機儲存 · 備份資料</button></div>
  </aside><main class="app" id="mainContent">
 
   <div class="storage-error" id="storageErrorBanner">
@@ -36,18 +36,18 @@
   </div>
 
   <header class="top"><div class="breadcrumb">我的學習空間 <span>/</span> <b id="pageLabel">筆記書房</b></div><div class="top-right"><span id="todayLabel" class="muted"></span><span class="avatar" aria-label="個人學習空間">G</span></div></header>
- <section class="welcome" aria-label="溫書鵝的歡迎訊息"><div class="welcome-copy"><div class="eyebrow">每天一點，慢慢累積</div><h1>把零散的筆記，<br>慢慢讀成自己的知識。</h1><p>整理、理解、再複習。溫書鵝陪你一步一步來。</p><button class="btn" id="heroNewNote">＋ 寫一篇筆記</button><button class="text-button" id="heroPlan">安排讀書進度 <span>↗</span></button></div><div class="hero-art"><span class="handwritten">今天也一起溫書吧！</span><img src="assets/goose.png" alt="溫書鵝正在認真寫筆記"></div></section>
- <div class="overview" id="overview"><div><span class="stat-icon">▤</span><p>累積筆記<strong id="noteTotal">0 <small>篇</small></strong></p></div><div><span class="stat-icon peach">▧</span><p>學習科目<strong id="subjectTotal">0 <small>科</small></strong></p></div><div><span class="stat-icon lavender">✧</span><p>統整筆記<strong id="digestTotal">0 <small>份</small></strong></p></div><div class="overview-tip">每天留下一點理解，<br><b>就是很好的進度。</b></div></div>
+ <section class="welcome" aria-label="學習概覽"><div class="welcome-copy"><h1 class="sr-only">學習概覽</h1><div class="overview" id="overview"><div><span class="stat-icon">▤</span><p>累積筆記<strong id="noteTotal">0 <small>篇</small></strong></p></div><div><span class="stat-icon peach">▧</span><p>學習科目<strong id="subjectTotal">0 <small>科</small></strong></p></div><div><span class="stat-icon lavender">✧</span><p>統整筆記<strong id="digestTotal">0 <small>份</small></strong></p></div></div><div class="welcome-actions"><button class="btn" id="heroNewNote">寫一篇筆記</button><button class="btn plan-button" id="heroPlan">安排讀書進度</button></div></div><div class="hero-art"><img src="assets/goose.png" alt="溫書鵝正在認真寫筆記"></div></section>
 
   <div class="countdown-bar" id="countdownBar" style="display:none">
     <div class="row"><span id="cdText"></span><span id="cdDays"></span></div>
     <div class="track" role="progressbar" aria-label="各科平均完成進度" aria-valuemin="0" aria-valuemax="100" id="studyProgress"><div class="fill" id="cdFill"></div><div class="review-seg" id="cdReview"></div><span class="progress-goose" id="progressGoose" role="img" aria-label="正在小跑的溫書鵝"><img class="run-frame run-a" src="assets/goose-running.png" alt=""><img class="run-frame run-b" src="assets/goose-running-b.png" alt=""><i class="sweat drop-one" aria-hidden="true"></i><i class="sweat drop-two" aria-hidden="true"></i><i class="sweat drop-three" aria-hidden="true"></i></span></div><div class="progress-note">有設定總量的科目採等權平均；各科依自己的頁數、章數或時數計算完成率。</div><div class="progress-note" id="goosePaceLabel"></div><div id="progressCourses" class="progress-course"></div>
   </div>
 
-  <nav class="tabs" aria-label="主要導覽"><button data-tab="notes" class="active"><span>▤</span> 筆記書房</button><button data-tab="daily"><span>◷</span> 每日進度</button><button data-tab="consolidate"><span>✧</span> AI 複習筆記</button><button data-tab="examsources"><span>▧</span> 考古資料</button><button data-tab="mock"><span>✓</span> 模擬測驗</button><div class="nav-divider"></div><button data-tab="setup"><span>⚙</span> 計畫與設定</button><button data-tab="backup"><span>⇩</span> 備份與還原</button></nav>
+  <nav class="tabs" aria-label="主要導覽"><button data-tab="notes" class="active"><span>▤</span> 筆記書房</button><button data-tab="daily"><span>◷</span> 每日進度</button><button data-tab="consolidate"><span>✧</span> AI 複習筆記</button><button data-tab="examsources"><span>▧</span> 考古資料</button><button data-tab="mock"><span>✓</span> 模擬測驗</button><div class="nav-divider"></div><button data-tab="setup"><span>⚙</span> 計畫與設定</button><button data-tab="backup"><span>▣</span> 備份與還原</button></nav>
 
   <!-- SETUP -->
   <section class="panel" id="panel-setup">
+    <h2 class="panel-title">計畫與設定</h2>
     <div class="card">
       <h3>考試資訊</h3>
       <div class="grid2">
@@ -101,6 +101,7 @@
 
   <!-- DAILY -->
   <section class="panel" id="panel-daily">
+    <h2 class="panel-title">每日進度</h2>
     <div class="card" id="dailyCard"></div>
     <div class="card">
       <h3>補登 / 回溯進度</h3>
@@ -123,15 +124,16 @@
 
   <!-- NOTES -->
   <section class="panel active" id="panel-notes">
-    <div class="section-heading"><div><div class="eyebrow">給知識一個安心的家</div><h2>筆記書房 <span id="visibleCount" class="count-badge">0</span></h2><p>讓每一份靈感與重點，都有好好安放的地方。</p></div><div class="heading-actions"><button class="btn secondary" id="showImportBtn">↥ 匯入檔案</button><button class="btn" id="newNoteBtn">＋ 新增筆記</button></div></div>
-    <details class="card import-card" id="importPanel"><summary>匯入你的筆記 <span class="muted">PDF、圖片、Word、PowerPoint、TXT、Markdown</span></summary><div class="grid2"><div><label for="noteSubjectSelect">所屬科目</label><select id="noteSubjectSelect"></select></div><div><label for="noteChapterSelect">章節（選填）</label><select id="noteChapterSelect"><option value="">不指定章節</option></select></div></div><label class="drop-zone" for="pdfInput"><span>↥</span><b>選擇一份或多份檔案</b><small>純文字擷取不需要 AI；圖片辨識需要連接 AI Relay。</small><input type="file" id="pdfInput" accept="application/pdf,image/*,.docx,.pptx,.txt,.md,text/plain" multiple></label><p id="uploadStatus" class="muted" role="status"></p><p class="muted">儲存擷取後的文字，不保存原始檔。未連接 AI 時，PDF 圖片／掃描頁會標記為待辨識。辨識結果請對照原稿核對。</p></details>
+    <div class="section-heading"><div><div class="eyebrow">給知識一個安心的家</div><h2>筆記書房 <span id="visibleCount" class="count-badge">0</span></h2><p>讓每一份靈感與重點，都有好好安放的地方。</p></div><div class="heading-actions"><button class="btn secondary" id="showImportBtn">匯入檔案</button><button class="btn" id="newNoteBtn">＋ 新增筆記</button></div></div>
+    <details class="card import-card" id="importPanel"><summary>匯入你的筆記 <span class="muted">PDF、圖片、Word、PowerPoint、TXT、Markdown</span></summary><div class="grid2"><div><label for="noteSubjectSelect">所屬科目</label><select id="noteSubjectSelect"></select></div><div><label for="noteChapterSelect">章節（選填）</label><select id="noteChapterSelect"><option value="">不指定章節</option></select></div></div><label class="drop-zone" for="pdfInput"><b>選擇一份或多份檔案</b><small>純文字擷取不需要 AI；圖片辨識需要連接 AI Relay。</small><input type="file" id="pdfInput" accept="application/pdf,image/*,.docx,.pptx,.txt,.md,text/plain" multiple></label><p id="uploadStatus" class="muted" role="status"></p><p class="muted">儲存擷取後的文字，不保存原始檔。未連接 AI 時，PDF 圖片／掃描頁會標記為待辨識。辨識結果請對照原稿核對。</p></details>
     <div class="notes-toolbar"><div class="search-box"><span aria-hidden="true">⌕</span><input type="search" id="noteSearch" placeholder="搜尋標題、內文或標籤…" aria-label="搜尋筆記"><kbd>Ctrl K</kbd></div><select id="filterSubject" aria-label="依科目篩選"><option value="">所有科目</option></select><select id="sortNotes" aria-label="排序筆記"><option value="updated">最近編輯</option><option value="title">標題排序</option><option value="created">建立時間</option></select></div>
     <div class="filter-row"><div class="note-tabs" role="group" aria-label="筆記狀態"><button data-filter="all" class="selected">全部筆記</button><button data-filter="starred">☆ 已收藏</button><button data-filter="trash">垃圾桶</button></div><label class="tag-filter">標籤 <input type="text" id="filterTag" placeholder="例如：重點" aria-label="依標籤篩選"></label></div>
-    <div class="notebook-layout"><div class="note-list-pane"><div id="notesList" aria-live="polite"></div></div><section id="editorPane" class="editor-pane" aria-label="筆記編輯區"><div id="editorEmpty" class="editor-empty"><img src="assets/goose.png" alt="溫書鵝"><span class="eyebrow">留下今天的理解</span><h3>今天，想記住什麼？</h3><p>選一篇筆記繼續讀，<br>或寫下你的第一個重點。</p><button id="emptyNewNote" class="btn secondary">＋ 開始寫筆記</button></div><div id="editorContent" hidden><div class="editor-topline"><span id="editorStatus" role="status">已儲存</span><div><button id="favoriteNoteBtn" class="icon-button" aria-label="收藏筆記" title="收藏筆記">☆</button><button id="downloadNoteBtn" class="icon-button" aria-label="下載 Markdown" title="下載 Markdown">⇩</button><button id="trashNoteBtn" class="icon-button" aria-label="移到垃圾桶" title="移到垃圾桶">⌫</button></div></div><input id="editorTitle" class="editor-title" aria-label="筆記標題" placeholder="無標題筆記"><div class="editor-meta"><label>科目<select id="editorSubject"></select></label><button class="text-button" id="addNoteSubject">＋ 科目</button><label>章節<select id="editorChapter"></select></label></div><label class="tags-label">標籤<input id="editorTags" placeholder="用逗號分隔，例如：重點, 待複習"></label><div class="format-bar"><div><button data-format="heading" title="標題">H2</button><button data-format="bold" title="粗體"><b>B</b></button><button data-format="list" title="條列清單">≡</button><button data-format="todo" title="待辦清單">☑</button></div><button id="previewNoteBtn">閱讀預覽</button></div><label class="sr-only" for="editorBody">筆記內文</label><textarea id="editorBody" placeholder="從一句話開始，把你理解的寫下來…&#10;&#10;支援 Markdown 標題、粗體、清單與表格。"></textarea><article id="notePreview" class="markdown-body" hidden></article><div class="editor-foot"><span id="editorWordCount">0 字</span><span>文字會自動儲存 · Ctrl S 立即儲存</span></div><div id="trashActions" hidden><p>這篇筆記在垃圾桶中，還原後即可編輯。</p><button id="restoreNoteBtn" class="btn">還原筆記</button><button id="deleteForeverBtn" class="btn danger">永久刪除</button></div></div></section></div>
+    <div class="notebook-layout"><div class="note-list-pane"><div id="notesList" aria-live="polite"></div></div><section id="editorPane" class="editor-pane" aria-label="筆記編輯區"><div id="editorEmpty" class="editor-empty"><img src="assets/goose.png" alt="溫書鵝"><span class="eyebrow">留下今天的理解</span><h3>今天，想記住什麼？</h3><p>選一篇筆記繼續讀，<br>或寫下你的第一個重點。</p><button id="emptyNewNote" class="btn secondary">＋ 開始寫筆記</button></div><div id="editorContent" hidden><div class="editor-topline"><span id="editorStatus" role="status">已儲存</span><div><button id="favoriteNoteBtn" class="icon-button" aria-label="收藏筆記" title="收藏筆記">☆</button><button id="downloadNoteBtn" class="icon-button" aria-label="下載 Markdown" title="下載 Markdown">MD</button><button id="trashNoteBtn" class="icon-button" aria-label="移到垃圾桶" title="移到垃圾桶">⌫</button></div></div><input id="editorTitle" class="editor-title" aria-label="筆記標題" placeholder="無標題筆記"><div class="editor-meta"><label>科目<select id="editorSubject"></select></label><button class="text-button" id="addNoteSubject">＋ 科目</button><label>章節<select id="editorChapter"></select></label></div><label class="tags-label">標籤<input id="editorTags" placeholder="用逗號分隔，例如：重點, 待複習"></label><div class="format-bar"><div><button data-format="heading" title="標題">H2</button><button data-format="bold" title="粗體"><b>B</b></button><button data-format="list" title="條列清單">≡</button><button data-format="todo" title="待辦清單">☑</button></div><button id="previewNoteBtn">閱讀預覽</button></div><label class="sr-only" for="editorBody">筆記內文</label><textarea id="editorBody" placeholder="從一句話開始，把你理解的寫下來…&#10;&#10;支援 Markdown 標題、粗體、清單與表格。"></textarea><article id="notePreview" class="markdown-body" hidden></article><div class="editor-foot"><span id="editorWordCount">0 字</span><span>文字會自動儲存 · Ctrl S 立即儲存</span></div><div id="trashActions" hidden><p>這篇筆記在垃圾桶中，還原後即可編輯。</p><button id="restoreNoteBtn" class="btn">還原筆記</button><button id="deleteForeverBtn" class="btn danger">永久刪除</button></div></div></section></div>
   </section>
 
   <!-- CONSOLIDATE -->
   <section class="panel" id="panel-consolidate">
+    <h2 class="panel-title">AI 複習筆記</h2>
     <div class="card">
       <div class="flex-between">
         <div>
@@ -161,6 +163,7 @@
 
   <!-- EXAM SOURCES -->
   <section class="panel" id="panel-examsources">
+    <h2 class="panel-title">考古資料</h2>
     <div class="card">
       <h3>考古資料與考情指引</h3>
       <p class="muted">老師提供的「觀念為主、常考範圍、出題提醒」請選擇「考情指引」：它不會被當成題目，而是用來調整模擬考的出題權重、以及總複習頁「標重點」的依據。若有實際歷屆試題或回憶題，再選擇題目類型。</p>
@@ -188,6 +191,7 @@
 
   <!-- MOCK EXAM -->
   <section class="panel" id="panel-mock">
+    <h2 class="panel-title">模擬測驗</h2>
     <div class="card">
       <h3>產生模擬考</h3>
       <label>納入科目（依統整筆記、原始筆記與「考古資料」頁已加入的資料出題）</label>
@@ -223,7 +227,7 @@
   </section>
 
   <!-- 頁尾只提供工具入口與本機儲存提醒，不會參與讀書計畫或模擬考資料。 -->
-  <section class="panel" id="panel-backup"><div class="section-heading"><div><div class="eyebrow">好好保存學習足跡</div><h2>備份你的學習足跡</h2></div></div><div class="card backup-card"><h3>把整個書房帶著走</h3><p>匯出讀書計畫、筆記文字、標籤、垃圾桶、考古資料與模擬考紀錄。備份不含 Relay 密碼及 API Key，也不含上傳前的原始 PDF 或圖片。</p><button id="exportBackupBtn" class="btn">⇩ 下載完整備份</button><label for="importBackupInput" class="import-label">從備份還原（JSON）</label><input type="file" id="importBackupInput" accept=".json,application/json"><p class="muted">還原前會先顯示筆記數量供你確認；還原會取代目前資料。請先下載現有備份。</p><p id="backupStatus" role="status"></p></div><div class="card"><h3>資料存在哪裡？</h3><p>資料儲存在目前瀏覽器。換裝置、換網址或清除瀏覽資料時，不會自動同步，請用備份檔搬移。</p><p class="muted">在原本網站網址更新時，會自動讀取舊版資料；本機預覽使用不同網址，需要先在舊網站匯出。</p><a href="舊版備份工具.txt" download>下載舊版資料匯出指令</a></div></section><footer class="site-footer">
+  <section class="panel" id="panel-backup"><div class="section-heading"><div><div class="eyebrow">好好保存學習足跡</div><h2>備份與還原</h2></div></div><div class="card backup-card"><h3>把整個書房帶著走</h3><p>匯出讀書計畫、筆記文字、標籤、垃圾桶、考古資料與模擬考紀錄。備份不含 Relay 密碼及 API Key，也不含上傳前的原始 PDF 或圖片。</p><button id="exportBackupBtn" class="btn">下載完整備份</button><label for="importBackupInput" class="import-label">從備份還原（JSON）</label><input type="file" id="importBackupInput" accept=".json,application/json"><p class="muted">還原前會先顯示筆記數量供你確認；還原會取代目前資料。請先下載現有備份。</p><p id="backupStatus" role="status"></p></div><div class="card"><h3>資料存在哪裡？</h3><p>資料儲存在目前瀏覽器。換裝置、換網址或清除瀏覽資料時，不會自動同步，請用備份檔搬移。</p><p class="muted">在原本網站網址更新時，會自動讀取舊版資料；本機預覽使用不同網址，需要先在舊網站匯出。</p><a href="舊版備份工具.txt" download>下載舊版資料匯出指令</a></div></section><footer class="site-footer">
     <div class="footer-brand">
       <span class="footer-seal" aria-hidden="true">🦢</span>
       <div>
@@ -232,7 +236,7 @@
       </div>
     </div>
     <div class="footer-meta">
-      <a class="footer-tool" href="https://jhen-1993.github.io/my-vocab-app/" target="_blank" rel="noopener noreferrer" title="開啟 Worliya｜字卡小日子">✦ Worliya｜字卡小日子 <span aria-hidden="true">↗</span></a>
+      <a class="footer-tool" href="https://jhen-1993.github.io/my-vocab-app/" target="_blank" rel="noopener noreferrer" title="開啟 Worliya｜字卡小日子">✦ Worliya｜字卡小日子</a>
       <span class="footer-copy">讀書計畫、筆記與考情資料只儲存在這個瀏覽器裡；換裝置或清除瀏覽器資料前，請先備份重要內容。</span>
       <span class="footer-copyright">© 2026 Jhen-1993 · Personal study companion</span>
     </div>
